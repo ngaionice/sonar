@@ -7,20 +7,19 @@ use trie;
 
 -- there should only be 1 entry in this table; maybe we don't even want a table?
 create table ServerToken (
-    authId string,
-    authProvider string,
-    token string not null,
-    lastExported timestamptz not null,
-    primary key (authId, authProvider)
+    email string primary key,
+    idToken string not null,
+    refreshToken string not null,
+    lastExported timestamptz not null
 );
 
-create table IssuedToken (
-    token string primary key,
+create table Individual (
+    email string primary key,
     name string not null
 );
 
-create table IssuedTokenPermission (
-    token string not null references IssuedToken (token) on delete cascade,
+create table IndividualPermission (
+    token string not null references Individual (email) on delete cascade,
     permission string(6) not null,
     primary key (token, permission)
 );

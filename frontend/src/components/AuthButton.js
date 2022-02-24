@@ -4,13 +4,12 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import { Button, IconButton, Tooltip } from "@mui/material";
-import LogoutIcon from "@mui/icons-material/Logout";
+import { Button } from "@mui/material";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/userContext";
 
-const login = async (auth, provider, dispatchSession, isSignUp) => {
+const login = async (auth, provider, dispatchSession) => {
   const result = await signInWithPopup(auth, provider);
 
   // TODO: handle error codes from here: https://firebase.google.com/docs/reference/js/v8/firebase.auth.Auth#signinwithpopup
@@ -22,7 +21,7 @@ const login = async (auth, provider, dispatchSession, isSignUp) => {
   const credential = GoogleAuthProvider.credentialFromResult(result);
 
   const serverLoginResult = await axios.post(
-    `http://localhost:8000/api/${isSignUp ? "register" : "login"}`,
+    "http://localhost:8000/api/users/login",
     {
       token: credential.idToken,
     }
@@ -51,17 +50,9 @@ const logout = (auth, dispatchSession) => {
     .catch((err) => console.log(err));
 };
 
-const AuthButton = ({
-  mode,
-  dispatchSnackbar,
-  disabled,
-  setLoading,
-  redirect,
-}) => {
+const AuthButton = ({ setLoading, redirect }) => {
   const navigate = useNavigate();
   const [session, dispatchSession] = useUser();
-
-  const useSignUp = mode === "signup";
 
   const provider = new GoogleAuthProvider();
   provider.addScope("https://www.googleapis.com/auth/userinfo.email");
@@ -73,7 +64,7 @@ const AuthButton = ({
 
   const handleSignIn = () => {
     setLoading(true);
-    login(auth, provider, dispatchSession, useSignUp)
+    login(auth, provider, dispatchSession)
       .then(() => {
         redirect();
       })
@@ -86,10 +77,6 @@ const AuthButton = ({
           data = "Unknown error";
           status = 500;
         }
-        dispatchSnackbar({
-          type: "open",
-          payload: { message: `Error code ${status}: ${data}.` },
-        });
         setLoading(false);
       });
   };
@@ -99,38 +86,14 @@ const AuthButton = ({
     navigate("/");
   };
 
-  if (mode === "logoutIcon") {
-    return (
-      <Tooltip title={"Logout"}>
-        <IconButton onClick={handleSignOut}>
-          <LogoutIcon />
-        </IconButton>
-      </Tooltip>
-    );
-  }
-
-  if (session.isSignedIn) {
-    return (
-      <Button
-        variant="contained"
-        onClick={handleSignOut}
-        disableElevation
-        fullWidth
-      >
-        Logout
-      </Button>
-    );
-  }
-
   return (
     <Button
       variant="contained"
-      onClick={handleSignIn}
+      onClick={session.isSignedIn ? handleSignOut : handleSignIn}
       disableElevation
       fullWidth
-      disabled={disabled}
     >
-      {useSignUp ? "Sign up" : "Sign in"}
+      {session.isSignedIn ? "Logout" : "Login"}
     </Button>
   );
 };

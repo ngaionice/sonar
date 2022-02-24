@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import getDatabaseClient from "./clients/database-client.js";
 import initializeFirebase from "./firebase.js";
 import cors from "cors";
+import userRoutes from "./routes/user-routes.js";
 
 dotenv.config();
 initializeFirebase();
@@ -21,9 +22,7 @@ app.get("/health", (req, res) => {
   res.status(200).json(new Date());
 });
 
-app.post("/api/login", (req, res) => {
-  console.log(req.body);
-});
+app.use("/api/users", userRoutes(client));
 
 app.listen(process.env.PORT, () =>
   console.log(`Listening on port: ${process.env.PORT}.`)
