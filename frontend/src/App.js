@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { UserProvider } from "./contexts/userContext";
 import AuthButton from "./components/AuthButton";
 import { Route, Routes } from "react-router-dom";
+import UploadButton from "./components/UploadButton";
 
 function initializeFirebase() {
   const firebaseConfig = {
@@ -30,6 +31,7 @@ function App() {
       <Routes>
         <Route path="/" element={<AuthButton setLoading={() => {}} />} />
       </Routes>
+      <UploadButton />
     </UserProvider>
   );
 }

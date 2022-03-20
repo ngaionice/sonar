@@ -51,7 +51,7 @@ const loginUser = (dbClient) =>
       }
 
       res.status(200).json({
-        token: generateToken(user.id),
+        token: generateToken(user.email),
         name: user.name,
         isAdmin: email === hostEmail, // can be refactored later if permissions get implemented
       });

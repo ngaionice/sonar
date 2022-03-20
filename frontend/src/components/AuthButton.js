@@ -77,6 +77,7 @@ const AuthButton = ({ setLoading, redirect }) => {
           data = "Unknown error";
           status = 500;
         }
+        // TODO: do something to handle this error
         setLoading(false);
       });
   };
