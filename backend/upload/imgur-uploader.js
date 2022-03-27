@@ -9,15 +9,12 @@ function getImgurClient() {
   });
 }
 
-async function upload(buffer, name) {
+async function upload(buffer) {
   const obj = {};
-  console.log(process.env);
 
   const imgurFormData = new FormData();
   imgurFormData.append("image", buffer);
   imgurFormData.append("type", "file");
-  imgurFormData.append("name", name);
-  imgurFormData.append("description", "");
 
   try {
     const { data } = await getImgurClient().post("/image", imgurFormData, {

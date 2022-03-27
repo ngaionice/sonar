@@ -1,11 +1,9 @@
 import { Button } from "@mui/material";
 import axios from "axios";
-import { createRef } from "react";
 import { useUser } from "../contexts/userContext";
 
 function UploadButton() {
   const [user] = useUser();
-  const fileInput = createRef();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -14,6 +12,8 @@ function UploadButton() {
     for (let i = 0; i < file.files.length; i++) {
       formData.append("image", file.files[i]);
     }
+    formData.append("tags", JSON.stringify(["a", "b", "c"]));
+    formData.append("isPublic", "1"); // TODO: if not public, just skip this field and save data
 
     const config = {
       headers: {
@@ -31,7 +31,7 @@ function UploadButton() {
       <form onSubmit={handleSubmit}>
         <Button variant="contained" component="label">
           Upload File
-          <input type="file" id="selectedFile" hidden ref={fileInput} />
+          <input type="file" id="selectedFile" hidden />
         </Button>
         <Button type="submit">Submit</Button>
       </form>
