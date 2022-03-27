@@ -2,8 +2,7 @@ import fs from "fs";
 import FormData from "form-data";
 import { v4 as uuidv4 } from "uuid";
 
-import uploadToAws from "../aws/uploader.js";
-import getImgurClient from "../clients/imgur-client.js";
+import axios from "axios";
 
 function getStream(path, isFromInternet) {
   if (isFromInternet === true) {
@@ -13,6 +12,14 @@ function getStream(path, isFromInternet) {
   } else {
     throw new Error("No input provided for isFromInternet.");
   }
+}
+
+function getImgurClient() {
+  return axios.create({
+    baseURL: "https://api.imgur.com/3",
+    timeout: 10000,
+    headers: { Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}` },
+  });
 }
 
 /**
@@ -64,20 +71,9 @@ async function upload(getFilestream, fileName, extension, uploadToImgur) {
   const name = (fileName || uuidv4()) + "." + extension;
   const obj = {};
 
-  let filestream;
-  try {
-    filestream = getFilestream();
-    const awsUrl = await uploadToAws(filestream, name);
-    filestream.close();
-    obj.aws = { url: awsUrl };
-  } catch (e) {
-    console.log("Failed to upload to AWS.");
-    throw e;
-  }
-
   if (uploadToImgur) {
     const imgurFormData = new FormData();
-    filestream = getFilestream();
+    let filestream = getFilestream();
     imgurFormData.append("image", filestream);
     imgurFormData.append("type", "file");
     imgurFormData.append("name", name);

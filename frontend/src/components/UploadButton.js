@@ -12,7 +12,6 @@ function UploadButton() {
     const formData = new FormData();
     const file = document.getElementById("selectedFile");
     for (let i = 0; i < file.files.length; i++) {
-      console.log("a");
       formData.append("image", file.files[i]);
     }
 
