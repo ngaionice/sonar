@@ -1,18 +1,15 @@
 import asyncHandler from "express-async-handler";
 import imgurUpload from "../upload/imgur-uploader.js";
-import googleUpload from "../upload/google-uploader.js";
+import awsUpload from "../upload/aws-uploader.js";
 
 const upload = (dbClient) =>
   asyncHandler(async (req, res) => {
-    // console.log(req.file);
-    const { buffer, size, mimetype } = req.file;
+    const { buffer, size, mimetype, originalname } = req.file;
     const { tags: tagsString, isPublic } = req.body;
     const tags = tagsString ? JSON.parse(tagsString) : [];
     if (tags.length < 1) {
       tags.push("untagged");
     }
-    console.log(tags);
-    console.log(isPublic);
 
     const allowedTypesPrefix = /image\//;
     if (mimetype.search(allowedTypesPrefix) !== 0) {
@@ -25,13 +22,15 @@ const upload = (dbClient) =>
       return;
     }
 
-    const googleData = await googleUpload(buffer);
+    const locations = {};
+
+    locations.aws = await awsUpload(buffer, originalname);
+
     if (isPublic) {
-      const imgurData = await imgurUpload(buffer);
-      console.log(imgurData);
+      locations.imgur = await imgurUpload(buffer);
     }
 
-    res.status(201).json();
+    res.status(201).json(locations);
   });
 
 export { upload };

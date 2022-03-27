@@ -8,10 +8,16 @@ function getImgurClient() {
     headers: { Authorization: `Client-ID ${process.env.IMGUR_CLIENT_ID}` },
   });
 }
-
+/**
+ * Uploads a file to Imgur. Returns a promise that, if resolved, contains an object containing information about the uploaded file.
+ * Current fields include
+ * - `url`: the URL of the uploaded file
+ * - `deleteHash`: the hash required to delete the uploaded file from Imgur.
+ *
+ * @param buffer A buffer of an image.
+ * @return {Promise<{deleteHash: *, url: *}>}
+ */
 async function upload(buffer) {
-  const obj = {};
-
   const imgurFormData = new FormData();
   imgurFormData.append("image", buffer);
   imgurFormData.append("type", "file");
@@ -21,13 +27,11 @@ async function upload(buffer) {
       headers: imgurFormData.getHeaders(),
     });
     const { deletehash: deleteHash, link } = data.data;
-    obj.imgur = { deleteHash, url: link };
+    return { deleteHash, url: link };
   } catch (e) {
     console.log("Failed to upload to Imgur.");
     throw e;
   }
-
-  return obj;
 }
 
 export default upload;

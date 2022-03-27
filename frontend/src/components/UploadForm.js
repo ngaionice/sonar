@@ -44,7 +44,6 @@ function UploadForm() {
   };
 
   const handleTagDelete = (index) => {
-    console.log(tags.filter((_, i) => i !== index));
     setTags(tags.filter((_, i) => i !== index));
   };
 
@@ -52,7 +51,7 @@ function UploadForm() {
     e.preventDefault();
     const formData = new FormData();
     const file = document.getElementById("selectedFile");
-    console.log(file.files);
+
     for (let i = 0; i < file.files.length; i++) {
       formData.append("image", file.files[i]);
     }
@@ -72,6 +71,7 @@ function UploadForm() {
       .then(() => {})
       .catch((e) => {
         // TODO: some error handling?
+        console.log(e);
         alert("Failed to upload file.");
       })
       .then(() => {
@@ -96,13 +96,7 @@ function UploadForm() {
 
     return (
       <FormControlLabel
-        control={
-          <Checkbox
-            defaultChecked
-            checked={isPublic}
-            onChange={handleChangePublic}
-          />
-        }
+        control={<Checkbox checked={isPublic} onChange={handleChangePublic} />}
         label="Share publicly"
       />
     );
@@ -117,6 +111,7 @@ function UploadForm() {
           <TextField
             size="small"
             label="Tags"
+            autoFocus
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
