@@ -57,7 +57,6 @@ const AuthButton = ({ setLoading, redirect }) => {
   const provider = new GoogleAuthProvider();
   provider.addScope("https://www.googleapis.com/auth/userinfo.email");
   provider.addScope("https://www.googleapis.com/auth/userinfo.profile");
-  provider.addScope("https://www.googleapis.com/auth/drive.appdata");
 
   const auth = getAuth();
   auth.useDeviceLanguage();
