@@ -69,15 +69,15 @@ const AuthButton = ({ setLoading, redirect }) => {
         redirect();
       })
       .catch((err) => {
-        let data, status;
-        try {
-          data = err.response.data;
-          status = err.response.status;
-        } catch (err) {
-          data = "Unknown error";
-          status = 500;
-        }
-        // TODO: do something to handle this error
+        // TODO: uncomment code below and do something to handle this error?
+        // let data, status;
+        // try {
+        //   data = err.response.data;
+        //   status = err.response.status;
+        // } catch (err) {
+        //   data = "Unknown error";
+        //   status = 500;
+        // }
         setLoading(false);
       });
   };
