@@ -15,7 +15,7 @@ function getImgurClient() {
  * - `deleteHash`: the hash required to delete the uploaded file from Imgur.
  *
  * @param buffer A buffer of an image.
- * @return {Promise<{deleteHash: *, url: *}>}
+ * @return {Promise<{deleteHash: string, url: string}>}
  */
 async function upload(buffer) {
   const imgurFormData = new FormData();

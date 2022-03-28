@@ -26,9 +26,9 @@ create table IndividualPermission (
 
 -- mainUrl: the url
 create table Image (
-    id string primary key, -- the file id from g-drive api
-    mainUrl string not null, -- the webContentLink
-    useCache boolean default false -- whether to upload this file to imgur simultaneously for sharing
+    id string primary key, -- the key (i.e. file name) on S3 bucket
+    mainUrl string not null, -- the URL to access the resource on S3
+    useCache boolean default false -- whether this file should be on imgur
 );
 
 create table ImageCache (

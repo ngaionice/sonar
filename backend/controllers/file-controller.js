@@ -1,10 +1,15 @@
 import asyncHandler from "express-async-handler";
 import imgurUpload from "../upload/imgur-uploader.js";
 import awsUpload from "../upload/aws-uploader.js";
+import {
+  insertImage,
+  insertImageCache,
+  insertImageTags,
+} from "../database/file.js";
 
 const upload = (dbClient) =>
   asyncHandler(async (req, res) => {
-    const { buffer, size, mimetype, originalname } = req.file;
+    const { buffer, size, mimetype, originalname: oldName } = req.file;
     const { tags: tagsString, isPublic } = req.body;
     const tags = tagsString ? JSON.parse(tagsString) : [];
     if (tags.length < 1) {
@@ -22,15 +27,24 @@ const upload = (dbClient) =>
       return;
     }
 
-    const locations = {};
+    const out = {};
 
-    locations.aws = await awsUpload(buffer, originalname);
+    const name = String(Math.floor(Date.now() / 1000)).concat("-", oldName);
+    const { key, url: awsUrl } = await awsUpload(buffer, name);
+    out.aws = awsUrl;
+
+    await insertImage(dbClient, key, awsUrl, !!isPublic);
+    await insertImageTags(dbClient, key, tags);
 
     if (isPublic) {
-      locations.imgur = await imgurUpload(buffer);
+      const { url: imgurUrl, deleteHash: imgurDeleteHash } = await imgurUpload(
+        buffer
+      );
+      out.imgur = imgurUrl;
+      await insertImageCache(dbClient, key, imgurUrl, imgurDeleteHash);
     }
 
-    res.status(201).json(locations);
+    res.status(201).json(out);
   });
 
 export { upload };
