@@ -16,4 +16,25 @@ const insertImageStmt =
 const insertImageCacheStmt =
   "insert into ImageCache (imageId, cacheUrl, deleteHash) values ($1, $2, $3)";
 
-export { insertImageStmt, insertImageCacheStmt };
+/**
+ * Params:
+ * 1. search term
+ *
+ * Search for images with a tag the starts with the search term, and is case-insensitive
+ */
+const searchImagesApproximateStmt =
+  "select i.id, mainUrl, useCache, cacheUrl, deleteHash, tag from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag ilike concat($1, '%')";
+
+const searchImagesInsensitiveStmt =
+  "select i.id, mainUrl, useCache, cacheUrl, deleteHash, tag from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag ilike $1";
+
+const searchImagesExactStmt =
+  "select i.id, mainUrl, useCache, cacheUrl, deleteHash, tag from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag = $1";
+
+export {
+  insertImageStmt,
+  insertImageCacheStmt,
+  searchImagesApproximateStmt,
+  searchImagesInsensitiveStmt,
+  searchImagesExactStmt,
+};

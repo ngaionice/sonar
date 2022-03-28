@@ -1,6 +1,6 @@
 import express from "express";
 import auth from "../middleware/auth.js";
-import { upload } from "../controllers/file-controller.js";
+import { search, upload } from "../controllers/file-controller.js";
 import multer from "multer";
 
 const multipartHandler = multer();
@@ -10,6 +10,7 @@ const getRouter = (dbClient) => {
 
   router.use(auth(dbClient));
   router.post("/upload", multipartHandler.single("image"), upload(dbClient));
+  router.get("/search", search(dbClient));
   return router;
 };
 

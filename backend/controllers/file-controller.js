@@ -5,6 +5,7 @@ import {
   insertImage,
   insertImageCache,
   insertImageTags,
+  searchImagesByTag,
 } from "../database/file.js";
 
 const upload = (dbClient) =>
@@ -47,4 +48,11 @@ const upload = (dbClient) =>
     res.status(201).json(out);
   });
 
-export { upload };
+const search = (dbClient) =>
+  asyncHandler(async (req, res) => {
+    const { term, mode } = req.query;
+    const results = await searchImagesByTag(dbClient, term, Number(mode));
+    res.status(200).json(results);
+  });
+
+export { upload, search };
