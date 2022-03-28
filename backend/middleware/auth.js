@@ -15,7 +15,14 @@ const verifyToken = (dbClient) =>
         token = req.headers.authorization.split(" ")[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        req.user = await User.findByEmail(dbClient, decoded.email);
+        const user = await User.findByEmail(dbClient, decoded.email);
+
+        if (!user) {
+          res.status(401).message("Unauthorized.");
+          return;
+        } else {
+          req.user = user;
+        }
 
         next();
       } catch {
