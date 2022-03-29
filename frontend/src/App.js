@@ -5,6 +5,7 @@ import { UserProvider } from "./contexts/userContext";
 import AuthButton from "./components/AuthButton";
 import { Route, Routes } from "react-router-dom";
 import UploadForm from "./components/UploadForm";
+import SearchModule from "./components/SearchModule";
 
 function initializeFirebase() {
   const firebaseConfig = {
@@ -32,6 +33,7 @@ function App() {
         <Route path="/" element={<AuthButton setLoading={() => {}} />} />
       </Routes>
       <UploadForm />
+      <SearchModule setResults={(v) => console.log(v)} />
     </UserProvider>
   );
 }
