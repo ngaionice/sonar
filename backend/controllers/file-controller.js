@@ -47,13 +47,14 @@ const search = (dbClient) =>
   asyncHandler(async (req, res) => {
     const { term, mode } = req.query;
     const results = await File.searchImagesByTag(dbClient, term, Number(mode));
+    const expiry = String(Math.floor(Date.now() / 1000));
     results.forEach((r) => {
       if (!r.usecache) {
         // generate a temporary URL if the file is not set to be shared to the public via Imgur
         r.url = AWS.generateSignedUrl(r.id);
       }
     });
-    res.status(200).json(results);
+    res.status(200).json({ expiry, data: results });
   });
 
 export { upload, search };
