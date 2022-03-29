@@ -35,18 +35,18 @@ async function upload(buffer, name) {
 }
 
 /**
- * Returns a readable stream of the requested file.
+ * Returns a URL that allows read access to the input key, with an expiry time of 1 hour.
  *
- * @param key The key of the file.
- * @return {stream.Readable}
+ * @param key The key of the file
+ * @return {string} The signed URL that can be used for viewing the file
  */
-function download(key) {
-  const downloadParams = {
+function generateSignedUrl(key) {
+  const signingParams = {
     Bucket: process.env.AWS_S3_BUCKET_NAME,
     Key: key,
+    Expires: 3600,
   };
-
-  return s3.getObject(downloadParams).createReadStream();
+  return s3.getSignedUrl("getObject", signingParams);
 }
 
-export { upload, download };
+export { upload, generateSignedUrl };

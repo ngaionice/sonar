@@ -17,19 +17,46 @@ const insertImageCacheStmt =
   "insert into ImageCache (imageId, cacheUrl, deleteHash) values ($1, $2, $3)";
 
 /**
+ * Returns the following fields:
+ * - `id`
+ * - `usecache`
+ * - `url`
+ *
  * Params:
  * 1. search term
  *
  * Search for images with a tag the starts with the search term, and is case-insensitive
  */
 const searchImagesApproximateStmt =
-  "select i.id, mainUrl, useCache, cacheUrl, deleteHash, tag from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag ilike concat($1, '%')";
+  "select i.id, useCache, cacheUrl as url from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag ilike concat($1, '%')";
 
+/**
+ * Returns the following fields:
+ * - `id`
+ * - `usecache`
+ * - `url`
+ *
+ * Params:
+ * 1. search term
+ *
+ * Search for images with a tag matching the search term, case-insensitive
+ */
 const searchImagesInsensitiveStmt =
-  "select i.id, mainUrl, useCache, cacheUrl, deleteHash, tag from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag ilike $1";
+  "select i.id, useCache, cacheUrl as url from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag ilike $1";
 
+/**
+ * Returns the following fields:
+ * - `id`
+ * - `usecache`
+ * - `url`
+ *
+ * Params:
+ * 1. search term
+ *
+ * Search for images with a tag matching the search term, case-sensitive
+ */
 const searchImagesExactStmt =
-  "select i.id, mainUrl, useCache, cacheUrl, deleteHash, tag from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag = $1";
+  "select i.id, useCache, cacheUrl as url from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag = $1";
 
 export {
   insertImageStmt,
