@@ -1,6 +1,9 @@
 import asyncHandler from "express-async-handler";
-import imgurUpload from "../upload/imgur-uploader.js";
-import awsUpload from "../upload/aws-uploader.js";
+import imgurUpload from "../storage/imgur-manager.js";
+import {
+  upload as awsUpload,
+  download as awsDownload,
+} from "../storage/aws-manager.js";
 import {
   insertImage,
   insertImageCache,
@@ -55,4 +58,11 @@ const search = (dbClient) =>
     res.status(200).json(results);
   });
 
-export { upload, search };
+const download = () =>
+  asyncHandler(async (req, res) => {
+    const { key } = req.query;
+    const stream = awsDownload(key);
+    stream.pipe(res);
+  });
+
+export { upload, download, search };

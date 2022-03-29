@@ -34,4 +34,19 @@ async function upload(buffer, name) {
   }
 }
 
-export default upload;
+/**
+ * Returns a readable stream of the requested file.
+ *
+ * @param key The key of the file.
+ * @return {stream.Readable}
+ */
+function download(key) {
+  const downloadParams = {
+    Bucket: process.env.AWS_S3_BUCKET_NAME,
+    Key: key,
+  };
+
+  return s3.getObject(downloadParams).createReadStream();
+}
+
+export { upload, download };
