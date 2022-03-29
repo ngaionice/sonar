@@ -1,11 +1,12 @@
 import { initializeApp } from "firebase/app";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 import { UserProvider } from "./contexts/userContext";
 import AuthButton from "./components/AuthButton";
 import { Route, Routes } from "react-router-dom";
 import UploadForm from "./components/UploadForm";
 import SearchModule from "./components/SearchModule";
+import ImageDisplay from "./components/ImageDisplay";
 
 function initializeFirebase() {
   const firebaseConfig = {
@@ -27,13 +28,16 @@ function App() {
     initialized.current = true;
   }
 
+  const [data, setData] = useState([]);
+
   return (
     <UserProvider>
       <Routes>
         <Route path="/" element={<AuthButton setLoading={() => {}} />} />
       </Routes>
       <UploadForm />
-      <SearchModule setResults={(v) => console.log(v)} />
+      <SearchModule setResults={setData} />
+      <ImageDisplay images={data.data ?? []} />
     </UserProvider>
   );
 }

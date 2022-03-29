@@ -38,7 +38,7 @@ function SearchModule({ setResults }) {
       clearTimeout(timerId);
       changed = true;
     };
-  }, [searchTerm, mode, setResults]);
+  }, [searchTerm, mode, setResults, user.token]);
 
   const handleTermChange = (e) => {
     setSearchTerm(e.target.value);
