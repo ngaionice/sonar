@@ -66,10 +66,11 @@ const remove = (dbClient) =>
       return;
     }
 
-    await Promise.all([
-      AWS.remove(keys),
-      File.getHashesByKeys(dbClient, keys).then((h) => Imgur.remove(h)),
-    ]);
+    await AWS.remove(keys);
+    const hashes = (await File.getHashesByKeys(dbClient, keys)).map(
+      (o) => o.deletehash
+    );
+    await Imgur.remove(hashes);
 
     await File.deleteImagesByKey(dbClient, keys);
     res.status(200);

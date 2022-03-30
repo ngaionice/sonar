@@ -63,7 +63,7 @@ const searchImagesExactStmt =
  * 1. list of image ids/keys
  */
 const selectHashesByKeyStmt =
-  "select deleteHash from Image i join ImageTag it on i.id = it.imageId where i.id in ($1:csv)";
+  "select deleteHash from Image i join ImageCache ic on i.id = ic.imageId where i.id in ($1:csv)";
 
 /**
  * Params:

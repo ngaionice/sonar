@@ -42,7 +42,7 @@ async function upload(buffer) {
 async function remove(hashes) {
   const client = getImgurClient();
   const deletions = hashes.map((h) => {
-    client.delete(`/delete/${h}`);
+    client.delete(`/image/${h}`);
   });
   const output = await Promise.allSettled(deletions);
   const failed = [];

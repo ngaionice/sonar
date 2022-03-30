@@ -63,10 +63,9 @@ async function remove(keys) {
       Quiet: true,
     },
   };
-  const deleteFromS3 = promisify(s3.deleteObjects);
 
-  let res = await deleteFromS3(params);
-  // TODO: clean up this part after testing
+  let res = await s3.deleteObjects(params).promise();
+  // TODO: check the 'Errors' array in res to make sure everything succeeded
   console.log(res);
 }
 
