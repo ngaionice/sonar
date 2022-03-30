@@ -58,10 +58,25 @@ const searchImagesInsensitiveStmt =
 const searchImagesExactStmt =
   "select i.id, useCache, cacheUrl as url from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag = $1";
 
+/**
+ * Params:
+ * 1. list of image ids/keys
+ */
+const selectHashesByKeyStmt =
+  "select deleteHash from Image i join ImageTag it on i.id = it.imageId where i.id in ($1:csv)";
+
+/**
+ * Params:
+ * 1. list of image ids/keys
+ */
+const deleteImagesByKeyStmt = "delete from Image where id in ($1:csv)";
+
 export {
   insertImageStmt,
   insertImageCacheStmt,
   searchImagesApproximateStmt,
   searchImagesInsensitiveStmt,
   searchImagesExactStmt,
+  selectHashesByKeyStmt,
+  deleteImagesByKeyStmt,
 };

@@ -1,4 +1,5 @@
 import AWS from "aws-sdk";
+import { promisify } from "util";
 
 const s3 = new AWS.S3({
   apiVersion: "2006-03-01",
@@ -16,17 +17,17 @@ const s3 = new AWS.S3({
  * @return {Promise<{key: string, url: string}>}
  */
 async function upload(buffer, name) {
-  const uploadParams = {
+  const params = {
     Bucket: process.env.AWS_S3_BUCKET_NAME,
     Key: null,
     Body: null,
   };
 
-  uploadParams.Key = name;
-  uploadParams.Body = buffer;
+  params.Key = name;
+  params.Body = buffer;
 
   try {
-    const { Location: url, Key: key } = await s3.upload(uploadParams).promise();
+    const { Location: url, Key: key } = await s3.upload(params).promise();
     return { url, key };
   } catch (e) {
     console.log(`Failed to upload ${name}.`);
@@ -41,12 +42,32 @@ async function upload(buffer, name) {
  * @return {string} The signed URL that can be used for viewing the file
  */
 function generateSignedUrl(key) {
-  const signingParams = {
+  const params = {
     Bucket: process.env.AWS_S3_BUCKET_NAME,
     Key: key,
     Expires: 3600,
   };
-  return s3.getSignedUrl("getObject", signingParams);
+  return s3.getSignedUrl("getObject", params);
 }
 
-export { upload, generateSignedUrl };
+/**
+ * Deletes images matching the input array of keys.
+ * @param {string[]} keys An array of image keys.
+ * @return {Promise<void>}
+ */
+async function remove(keys) {
+  const params = {
+    Bucket: process.env.AWS_S3_BUCKET_NAME,
+    Delete: {
+      Objects: keys.map((k) => ({ Key: k })),
+      Quiet: true,
+    },
+  };
+  const deleteFromS3 = promisify(s3.deleteObjects);
+
+  let res = await deleteFromS3(params);
+  // TODO: clean up this part after testing
+  console.log(res);
+}
+
+export { generateSignedUrl, remove, upload };

@@ -34,4 +34,24 @@ async function upload(buffer) {
   }
 }
 
-export default upload;
+/**
+ * Deletes the Imgur images specified by the input hashes.
+ * @param {string[]} hashes An array of Imgur hashes
+ * @return {Promise<string[]>} A promise when resolved, contains a list of hashes that failed.
+ */
+async function remove(hashes) {
+  const client = getImgurClient();
+  const deletions = hashes.map((h) => {
+    client.delete(`/delete/${h}`);
+  });
+  const output = await Promise.allSettled(deletions);
+  const failed = [];
+  for (let i = 0; i < hashes.length; i++) {
+    if (output[i].status !== "fulfilled") {
+      failed.push(hashes[i]);
+    }
+  }
+  return failed;
+}
+
+export { remove, upload };

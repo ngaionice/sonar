@@ -1,9 +1,11 @@
 import {
+  deleteImagesByKeyStmt,
   insertImageCacheStmt,
   insertImageStmt,
   searchImagesApproximateStmt,
   searchImagesExactStmt,
   searchImagesInsensitiveStmt,
+  selectHashesByKeyStmt,
 } from "./statements/file-statements.js";
 
 import pgpUninitialized from "pg-promise";
@@ -58,4 +60,32 @@ async function searchImagesByTag(client, tag, mode) {
   return await client.manyOrNone(stmt, [tag]);
 }
 
-export { insertImage, insertImageCache, insertImageTags, searchImagesByTag };
+/**
+ *
+ * @param client
+ * @param {string[]} keys An array of keys.
+ * @return {Promise<*>}
+ */
+async function deleteImagesByKey(client, keys) {
+  if (keys.length === 0) return;
+  return await client.none(deleteImagesByKeyStmt, [keys]);
+}
+
+/**
+ *
+ * @param client
+ * @param {string[]} keys An array of keys.
+ */
+async function getHashesByKeys(client, keys) {
+  if (keys.length === 0) return;
+  return await client.manyOrNone(selectHashesByKeyStmt, [keys]);
+}
+
+export {
+  deleteImagesByKey,
+  getHashesByKeys,
+  insertImage,
+  insertImageCache,
+  insertImageTags,
+  searchImagesByTag,
+};

@@ -1,5 +1,5 @@
 import asyncHandler from "express-async-handler";
-import imgurUpload from "../storage/imgur-manager.js";
+import * as Imgur from "../storage/imgur-manager.js";
 import * as AWS from "../storage/aws-manager.js";
 import * as File from "../database/file.js";
 
@@ -33,7 +33,7 @@ const upload = (dbClient) =>
     await File.insertImageTags(dbClient, key, tags);
 
     if (isPublic) {
-      const { url: imgurUrl, deleteHash: imgurDeleteHash } = await imgurUpload(
+      const { url: imgurUrl, deleteHash: imgurDeleteHash } = await Imgur.upload(
         buffer
       );
       out.imgur = imgurUrl;
@@ -57,4 +57,22 @@ const search = (dbClient) =>
     res.status(200).json({ expiry, data: results });
   });
 
-export { upload, search };
+const remove = (dbClient) =>
+  asyncHandler(async (req, res) => {
+    const { keys: keysString } = req.query;
+    const keys = JSON.parse(keysString);
+    if (!Array.isArray(keys)) {
+      res.status(400).message("Invalid keys.");
+      return;
+    }
+
+    await Promise.all([
+      AWS.remove(keys),
+      File.getHashesByKeys(dbClient, keys).then((h) => Imgur.remove(h)),
+    ]);
+
+    await File.deleteImagesByKey(dbClient, keys);
+    res.status(200);
+  });
+
+export { upload, search, remove };
