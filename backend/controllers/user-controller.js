@@ -4,7 +4,7 @@ import {
   signInWithCredential,
   GoogleAuthProvider,
 } from "firebase/auth";
-import generateToken from "../utils/generateToken.js";
+import generateToken from "../utils/generate-token.js";
 import * as Individual from "../database/user.js";
 
 // Takes in an ID token from Google OAuth, and verifies it. If valid, returns the token payload, else throws an error.
