@@ -17,7 +17,7 @@ const getTags = (tagsString) => {
 const getNewFilename = (filename, extension) =>
   String(Math.floor(Date.now() / 1000)).concat(
     "-",
-    filename ?? "autoname",
+    filename ?? "image",
     extension ? "." + extension : ""
   );
 
@@ -75,7 +75,7 @@ const getDataFromUrl = async (req, res) => {
   const buffer = Buffer.from(image.data, "utf-8");
 
   const name = getNewFilename(
-    "autoname",
+    "image",
     image.headers["content-type"].substring(6)
   );
 

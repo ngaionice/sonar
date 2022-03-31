@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "../contexts/userContext";
 
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
@@ -26,6 +26,10 @@ function UploadForm() {
   const [isPublic, setIsPublic] = useState(false);
   const [uploadMode, setUploadMode] = useState(0);
   const [tags, setTags] = useState([]);
+
+  useEffect(() => {
+    console.log("render");
+  });
 
   const FileUploader = () => {
     const FileName = () => {
@@ -75,6 +79,39 @@ function UploadForm() {
     );
   };
 
+  const ClipboardUploader = () => {
+    useEffect(() => {
+      const listener = (e) => {
+        // Get the data of clipboard
+        const clipboardItems = e.clipboardData.items;
+        const items = [...clipboardItems].filter(
+          (item) => item.type.indexOf("image") !== -1
+        );
+        if (items.length === 0) {
+          return;
+        }
+
+        // Get the blob of image
+        const blob = items[0].getAsFile();
+        setSelected({ type: "file", data: blob });
+      };
+      document.addEventListener("paste", listener);
+      return () => {
+        document.removeEventListener("paste", listener);
+      };
+    }, []);
+
+    return (
+      <img
+        id="clipboardPreview"
+        alt=""
+        src={
+          selected.type === "file" ? URL.createObjectURL(selected?.data) : ""
+        }
+      />
+    );
+  };
+
   const ModePicker = () => {
     const handleClick = (val) => {
       setUploadMode(val);
@@ -100,7 +137,7 @@ function UploadForm() {
       } else if (uploadMode === 1) {
         return <UrlUploader />;
       } else if (uploadMode === 2) {
-        return null;
+        return <ClipboardUploader />;
       } else {
         return null;
       }
