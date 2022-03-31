@@ -26,6 +26,11 @@ function ImageDisplay({ images }) {
   const ListEntry = ({ image }) => {
     const { id: title, url: img } = image;
 
+    if (!img) {
+      alert("Invalid file omitted.");
+      return null;
+    }
+
     const urlModifiers = "w=248&fit=crop&auto=format";
     const urlSetModifiers = "&dpr=2 2x";
 
