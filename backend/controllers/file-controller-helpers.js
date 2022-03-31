@@ -14,8 +14,12 @@ const getTags = (tagsString) => {
   return tags;
 };
 
-const getNewFilename = (filename) =>
-  String(Math.floor(Date.now() / 1000)).concat("-", filename ?? "autoname");
+const getNewFilename = (filename, extension) =>
+  String(Math.floor(Date.now() / 1000)).concat(
+    "-",
+    filename ?? "autoname",
+    extension ? "." + extension : ""
+  );
 
 const isValidFiletype = (type) => {
   const allowedTypesPrefix = /image\//;
@@ -70,7 +74,10 @@ const getDataFromUrl = async (req, res) => {
 
   const buffer = Buffer.from(image.data, "utf-8");
 
-  const name = getNewFilename();
+  const name = getNewFilename(
+    "autoname",
+    image.headers["content-type"].substring(6)
+  );
 
   return {
     buffer,
