@@ -24,15 +24,31 @@ const upload = (dbClient) =>
     const { key, url: awsUrl } = await AWS.upload(buffer, name);
     out.aws = awsUrl;
 
-    await File.insertImage(dbClient, key, awsUrl, !!isPublic);
-    await File.insertImageTags(dbClient, key, tags);
+    try {
+      await File.insertImage(dbClient, key, awsUrl, !!isPublic);
+      await File.insertImageTags(dbClient, key, tags);
+    } catch (e) {
+      console.log("Tag insertion failed.");
+      console.log(e);
+      await AWS.remove([key]);
+      res.status(500).message("Database issue");
+      return;
+    }
 
     if (isPublic) {
-      const { url: imgurUrl, deleteHash: imgurDeleteHash } = await Imgur.upload(
-        buffer
-      );
-      out.imgur = imgurUrl;
-      await File.insertImageCache(dbClient, key, imgurUrl, imgurDeleteHash);
+      try {
+        const { url: imgurUrl, deleteHash: imgurDeleteHash } =
+          await Imgur.upload(buffer);
+        out.imgur = imgurUrl;
+        await File.insertImageCache(dbClient, key, imgurUrl, imgurDeleteHash);
+      } catch (e) {
+        await AWS.remove([key]);
+        await File.deleteImagesByKey(dbClient, [key]);
+        console.log("Imgur upload failed.");
+        console.log(e);
+        res.status(500).message("Imgur issue");
+        return;
+      }
     }
 
     res.status(201).json(out);
