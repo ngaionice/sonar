@@ -15,13 +15,16 @@ import { useState } from "react";
 import { useUser } from "../contexts/userContext";
 
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import ContentPasteIcon from "@mui/icons-material/ContentPaste";
+import LinkIcon from "@mui/icons-material/Link";
 import StyleIcon from "@mui/icons-material/Style";
 import UploadIcon from "@mui/icons-material/Upload";
 
 function UploadForm() {
   const [user] = useUser();
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState("");
   const [isPublic, setIsPublic] = useState(false);
+  const [uploadMode, setUploadMode] = useState(0);
   const [tags, setTags] = useState([]);
 
   const handleFileSelection = () => {
@@ -50,10 +53,22 @@ function UploadForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
-    const file = document.getElementById("selectedFile");
+    switch (uploadMode) {
+      case 0:
+        const file = document.getElementById("selectedFile");
+        console.log(file.files);
 
-    for (let i = 0; i < file.files.length; i++) {
-      formData.append("image", file.files[i]);
+        for (let i = 0; i < file.files.length; i++) {
+          formData.append("image", file.files[i]);
+        }
+        break;
+      case 1:
+        formData.append("srcUrl", selected);
+        break;
+      case 2:
+        break;
+      default:
+        throw new Error("Illegal selected value.");
     }
     formData.append("tags", JSON.stringify(tags));
     if (isPublic) {
@@ -68,30 +83,97 @@ function UploadForm() {
 
     axios
       .post("http://localhost:8000/api/files/upload", formData, config)
-      .then(() => {})
       .catch((e) => {
         // TODO: some error handling?
         console.log(e);
         alert("Failed to upload file.");
       })
       .then(() => {
-        document.getElementById("selectedFile").value = null;
+        if (uploadMode === 0) {
+          document.getElementById("selectedFile").value = null;
+        }
         setTags([]);
-        setSelected(null);
+        setSelected("");
       });
   };
 
-  const FileName = () => {
-    if (!selected) return null;
+  const FileUploader = () => {
+    const FileName = () => {
+      if (!selected) return null;
+
+      return (
+        <Typography variant="body2" sx={{ paddingTop: "3px" }}>
+          {selected}
+        </Typography>
+      );
+    };
 
     return (
-      <Typography variant="body2" sx={{ paddingTop: "3px" }}>
-        {selected}
-      </Typography>
+      <form>
+        <Tooltip title="Select image" arrow>
+          <IconButton variant="contained" component="label">
+            <AddPhotoAlternateIcon />
+            <input
+              type="file"
+              id="selectedFile"
+              hidden
+              onChange={handleFileSelection}
+            />
+          </IconButton>
+        </Tooltip>
+        <FileName />
+      </form>
     );
   };
 
-  const PublicControl = () => {
+  const UrlUploader = () => {
+    const handleChange = (e) => {
+      setSelected(e.target.value);
+    };
+
+    return <TextField size="small" onChange={handleChange} value={selected} />;
+  };
+
+  const ModePicker = () => {
+    const handleClick = (val) => {
+      setUploadMode(val);
+      setSelected("");
+    };
+
+    const modes = [<UploadIcon />, <LinkIcon />, <ContentPasteIcon />];
+    return (
+      <Stack direction="row" spacing={1}>
+        {modes.map((m, index) => (
+          <IconButton key={index} onClick={() => handleClick(index)}>
+            {m}
+          </IconButton>
+        ))}
+      </Stack>
+    );
+  };
+
+  const UploadOptions = () => {
+    const Uploader = () => {
+      if (uploadMode === 0) {
+        return <FileUploader />;
+      } else if (uploadMode === 1) {
+        return <UrlUploader />;
+      } else if (uploadMode === 2) {
+        return null;
+      } else {
+        return null;
+      }
+    };
+
+    return (
+      <Stack spacing={1}>
+        <ModePicker />
+        <Uploader />
+      </Stack>
+    );
+  };
+
+  const PublicCheckbox = () => {
     if (!selected) return null;
 
     return (
@@ -131,12 +213,12 @@ function UploadForm() {
     );
   };
 
-  const Upload = () => {
+  const UploadButton = () => {
     if (!selected) return null;
 
     return (
       <Tooltip title="Upload" arrow>
-        <IconButton type="submit">
+        <IconButton onClick={handleSubmit}>
           <UploadIcon />
         </IconButton>
       </Tooltip>
@@ -144,29 +226,12 @@ function UploadForm() {
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <Stack spacing={1} alignItems="center">
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Tooltip title="Select image" arrow>
-              <IconButton variant="contained" component="label">
-                <AddPhotoAlternateIcon />
-                <input
-                  type="file"
-                  id="selectedFile"
-                  hidden
-                  onChange={handleFileSelection}
-                />
-              </IconButton>
-            </Tooltip>
-            <FileName />
-          </Stack>
-          <PublicControl />
-          <Tagger />
-          <Upload />
-        </Stack>
-      </form>
-    </div>
+    <Stack spacing={1} alignItems="center">
+      <UploadOptions />
+      <PublicCheckbox />
+      <Tagger />
+      <UploadButton />
+    </Stack>
   );
 }
 

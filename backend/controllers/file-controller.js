@@ -68,7 +68,7 @@ const remove = (dbClient) =>
     await Imgur.remove(hashes);
 
     await File.deleteImagesByKey(dbClient, keys);
-    res.status(200);
+    res.sendStatus(200);
   });
 
 export { upload, search, remove };

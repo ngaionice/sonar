@@ -28,13 +28,11 @@ const getDataFromUpload = (req, res) => {
 
   if (!isValidFiletype(mimetype)) {
     res.status(400).send("Invalid file type");
-    console.log("file type");
     throw new Error("Invalid file type");
   }
 
   if (size > 15728640) {
     res.status(400).send("File too large");
-    console.log("too large");
     throw new Error("File too large");
   }
 
@@ -51,6 +49,11 @@ const getDataFromUpload = (req, res) => {
 const getDataFromUrl = async (req, res) => {
   const { tags: tagsString, isPublic, srcUrl } = req.body;
   const tags = getTags(tagsString);
+
+  if (!srcUrl) {
+    res.status(400).send("No URL found");
+    throw new Error("No URL found");
+  }
 
   const image = await axios.get(srcUrl, {
     responseType: "arraybuffer",
