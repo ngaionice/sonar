@@ -1,7 +1,11 @@
 import {
+  Button,
   Checkbox,
   Chip,
   Container,
+  Dialog,
+  DialogActions,
+  DialogTitle,
   FormControlLabel,
   IconButton,
   InputAdornment,
@@ -14,11 +18,12 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useUser } from "../contexts/userContext";
 
-import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-import ContentPasteIcon from "@mui/icons-material/ContentPaste";
+import AddIcon from "@mui/icons-material/Add";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import CodeIcon from "@mui/icons-material/Code";
 import LinkIcon from "@mui/icons-material/Link";
 import StyleIcon from "@mui/icons-material/Style";
-import UploadIcon from "@mui/icons-material/Upload";
+import { LoadingButton } from "@mui/lab";
 
 function UploadForm() {
   const [user] = useUser();
@@ -27,59 +32,19 @@ function UploadForm() {
   const [uploadMode, setUploadMode] = useState(0);
   const [tags, setTags] = useState([]);
 
-  useEffect(() => {
-    console.log("render");
-  });
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const reset = () => {
+    setTags([]);
+    setSelected({});
+  };
 
   const FileUploader = () => {
-    const FileName = () => {
-      if (selected?.type !== "file") return null;
-
-      return (
-        <Typography variant="body2" sx={{ paddingTop: "3px" }}>
-          {selected.data?.name ?? "Name not available"}
-        </Typography>
-      );
-    };
-
     const handleFileSelection = () => {
       const selector = document.getElementById("selectedFile");
       setSelected({ type: "file", data: selector.files[0] });
     };
 
-    return (
-      <>
-        <Tooltip title="Select image" arrow>
-          <IconButton variant="contained" component="label">
-            <AddPhotoAlternateIcon />
-            <input
-              type="file"
-              id="selectedFile"
-              hidden
-              onChange={handleFileSelection}
-            />
-          </IconButton>
-        </Tooltip>
-        <FileName />
-      </>
-    );
-  };
-
-  const UrlUploader = () => {
-    const handleChange = (e) => {
-      setSelected({ type: "url", data: e.target.value });
-    };
-
-    return (
-      <TextField
-        size="small"
-        onChange={handleChange}
-        value={selected?.type === "url" ? selected?.data : ""}
-      />
-    );
-  };
-
-  const ClipboardUploader = () => {
     useEffect(() => {
       const listener = (e) => {
         // Get the data of clipboard
@@ -102,12 +67,43 @@ function UploadForm() {
     }, []);
 
     return (
-      <img
-        id="clipboardPreview"
-        alt=""
-        src={
-          selected.type === "file" ? URL.createObjectURL(selected?.data) : ""
-        }
+      <Stack alignItems="center">
+        <Stack direction="row" spacing={1} alignItems="baseline">
+          <Button variant="contained" component="label">
+            Select image
+            <input
+              type="file"
+              id="selectedFile"
+              hidden
+              onChange={handleFileSelection}
+            />
+          </Button>
+          <Typography variant="body1">
+            or paste an image here with <kbd>Ctrl</kbd> + <kbd>V</kbd>.
+          </Typography>
+        </Stack>
+      </Stack>
+    );
+  };
+
+  const UrlUploader = () => {
+    const handleChange = (e) => {
+      setSelected({ type: "url", data: e.target.value });
+    };
+
+    return (
+      <TextField
+        size="small"
+        label="URL"
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <CodeIcon />
+            </InputAdornment>
+          ),
+        }}
+        onChange={handleChange}
+        value={selected?.type === "url" ? selected?.data : ""}
       />
     );
   };
@@ -118,13 +114,18 @@ function UploadForm() {
       setSelected({});
     };
 
-    const modes = [<UploadIcon />, <LinkIcon />, <ContentPasteIcon />];
+    const modes = [
+      { icon: <AttachFileIcon />, label: "From files/clipboard" },
+      { icon: <LinkIcon />, label: "From link" },
+    ];
     return (
-      <Stack direction="row" spacing={1}>
-        {modes.map((m, index) => (
-          <IconButton key={index} onClick={() => handleClick(index)}>
-            {m}
-          </IconButton>
+      <Stack direction="row" spacing={1} justifyContent="center" flex={1}>
+        {modes.map((obj, index) => (
+          <Tooltip title={obj.label} key={index} arrow>
+            <IconButton onClick={() => handleClick(index)}>
+              {obj.icon}
+            </IconButton>
+          </Tooltip>
         ))}
       </Stack>
     );
@@ -136,8 +137,6 @@ function UploadForm() {
         return <FileUploader />;
       } else if (uploadMode === 1) {
         return <UrlUploader />;
-      } else if (uploadMode === 2) {
-        return <ClipboardUploader />;
       } else {
         return null;
       }
@@ -147,6 +146,54 @@ function UploadForm() {
       <Stack spacing={1}>
         <ModePicker />
         <Uploader />
+      </Stack>
+    );
+  };
+
+  const PreviewPanel = () => {
+    const FileName = () => {
+      if (selected?.type !== "file") return null;
+
+      return (
+        <Typography variant="body2" sx={{ paddingTop: "3px" }}>
+          {selected.data?.name ?? "Name not available"}
+        </Typography>
+      );
+    };
+
+    const PreviewImage = () => {
+      if (!selected.type) return null;
+
+      let src;
+      if (selected.type === "file") {
+        src = URL.createObjectURL(selected.data);
+      } else if (selected.type === "url") {
+        src = selected.data;
+      } else {
+        src = "";
+        alert("Invalid selected.type.");
+      }
+
+      return (
+        <>
+          <FileName />
+          <img
+            src={src}
+            alt="Upload preview"
+            style={{
+              maxWidth: "10rem",
+              width: "100%",
+              maxHeight: "10rem",
+              height: "100%",
+            }}
+          />
+        </>
+      );
+    };
+
+    return (
+      <Stack id="preview-panel" alignItems="center">
+        <PreviewImage />
       </Stack>
     );
   };
@@ -179,34 +226,35 @@ function UploadForm() {
     };
 
     return (
-      <Container maxWidth="sm">
-        <Stack spacing={1}>
-          <TextField
-            size="small"
-            label="Tags"
-            autoFocus
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <StyleIcon />
-                </InputAdornment>
-              ),
-            }}
-            onKeyDown={handleTagInsert}
-            disabled={!selected}
-          />
-          <Stack direction="row" spacing={1}>
-            {tags.map((t, i) => (
-              <Chip label={t} key={t} onDelete={() => handleTagDelete(i)} />
-            ))}
-          </Stack>
+      <Stack spacing={1}>
+        <TextField
+          size="small"
+          label="Tags"
+          autoFocus
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <StyleIcon />
+              </InputAdornment>
+            ),
+          }}
+          onKeyDown={handleTagInsert}
+          disabled={!selected}
+        />
+        <Stack direction="row" spacing={1}>
+          {tags.map((t, i) => (
+            <Chip label={t} key={t} onDelete={() => handleTagDelete(i)} />
+          ))}
         </Stack>
-      </Container>
+      </Stack>
     );
   };
 
   const UploadButton = () => {
+    const [loading, setLoading] = useState(false);
+
     const handleSubmit = () => {
+      setLoading(true);
       const formData = new FormData();
       switch (selected.type) {
         case "file":
@@ -248,29 +296,61 @@ function UploadForm() {
           if (uploadMode === 0) {
             document.getElementById("selectedFile").value = null;
           }
-          setTags([]);
-          setSelected("");
+          setLoading(false);
+          handleDialogClose();
         });
     };
 
     return (
-      <Tooltip title="Upload" arrow>
-        <span>
-          <IconButton onClick={handleSubmit} disabled={!selected}>
-            <UploadIcon />
-          </IconButton>
-        </span>
-      </Tooltip>
+      <LoadingButton
+        onClick={handleSubmit}
+        variant="contained"
+        loading={loading}
+      >
+        Done
+      </LoadingButton>
     );
   };
 
+  const DialogContents = () => {
+    return (
+      <Container maxWidth="md" sx={{ paddingY: 3 }}>
+        <Stack spacing={2}>
+          <UploadOptions />
+          <PreviewPanel />
+          <Tagger />
+          <PublicCheckbox />
+        </Stack>
+      </Container>
+    );
+  };
+
+  const handleDialogClose = () => {
+    reset();
+    setDialogOpen(false);
+  };
+
   return (
-    <Stack spacing={1} alignItems="center">
-      <UploadOptions />
-      <PublicCheckbox />
-      <Tagger />
-      <UploadButton />
-    </Stack>
+    <>
+      <Tooltip title="Upload" arrow>
+        <IconButton onClick={() => setDialogOpen(true)}>
+          <AddIcon />
+        </IconButton>
+      </Tooltip>
+      <Dialog
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Upload</DialogTitle>
+        <DialogContents />
+        <DialogActions>
+          <Button onClick={handleDialogClose}>Cancel</Button>
+          <UploadButton />
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
 
