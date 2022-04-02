@@ -3,10 +3,24 @@ import { useRef, useState } from "react";
 
 import { UserProvider } from "./contexts/userContext";
 import AuthButton from "./components/AuthButton";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import UploadForm from "./components/UploadForm";
 import SearchModule from "./components/SearchModule";
 import ImageDisplay from "./components/ImageDisplay";
+import AppBar from "./components/AppBar";
+import {
+  Box,
+  CssBaseline,
+  Stack,
+  StyledEngineProvider,
+  ThemeProvider,
+  Tooltip,
+  IconButton,
+} from "@mui/material";
+import getTheme from "./theme";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import LoginPage from "./pages/LoginPage";
 
 function initializeFirebase() {
   const firebaseConfig = {
@@ -29,16 +43,40 @@ function App() {
   }
 
   const [data, setData] = useState([]);
+  const [darkMode, setDarkMode] = useState(false);
+  let location = useLocation();
+
+  const BrightnessButton = () => (
+    <Tooltip title={"Toggle theme"} arrow>
+      <IconButton onClick={() => setDarkMode(!darkMode)}>
+        {darkMode ? <DarkModeIcon /> : <LightModeIcon />}
+      </IconButton>
+    </Tooltip>
+  );
 
   return (
-    <UserProvider>
-      <Routes>
-        <Route path="/" element={<AuthButton setLoading={() => {}} />} />
-      </Routes>
-      <UploadForm />
-      <SearchModule setResults={setData} />
-      <ImageDisplay images={data.data ?? []} />
-    </UserProvider>
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={getTheme(darkMode)}>
+        <UserProvider>
+          <CssBaseline />
+          <AppBar>
+            <Box sx={{ flexGrow: 1 }} />
+            <Stack spacing={1} direction="row">
+              <UploadForm />
+              <BrightnessButton />
+              {location.pathname === "/" ? null : (
+                <AuthButton setLoading={() => {}} useIcon />
+              )}
+            </Stack>
+          </AppBar>
+          <Routes>
+            <Route path="/" element={<LoginPage />} />
+          </Routes>
+          <SearchModule setResults={setData} />
+          <ImageDisplay images={data.data ?? []} />
+        </UserProvider>
+      </ThemeProvider>
+    </StyledEngineProvider>
   );
 }
 

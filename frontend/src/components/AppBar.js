@@ -29,7 +29,6 @@ function AppBar({ title, children }) {
           {children}
         </Toolbar>
       </MuiAppBar>
-      <Toolbar />
     </>
   );
 }

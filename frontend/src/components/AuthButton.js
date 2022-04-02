@@ -4,13 +4,14 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import { Button, IconButton, Tooltip } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/userContext";
 
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
+import { LoadingButton } from "@mui/lab";
 
 const login = async (auth, provider, dispatchSession) => {
   const result = await signInWithPopup(auth, provider);
@@ -53,7 +54,7 @@ const logout = (auth, dispatchSession) => {
     .catch((err) => console.log(err));
 };
 
-const AuthButton = ({ setLoading, mode, redirect }) => {
+const AuthButton = ({ loading, setLoading, useIcon, redirect }) => {
   const navigate = useNavigate();
   const [session, dispatchSession] = useUser();
 
@@ -89,7 +90,7 @@ const AuthButton = ({ setLoading, mode, redirect }) => {
     navigate("/");
   };
 
-  if (mode === "icon") {
+  if (useIcon) {
     return (
       <Tooltip title={session.isSignedIn ? "Logout" : "Login"} arrow>
         <IconButton onClick={session.isSignedIn ? handleSignOut : handleSignIn}>
@@ -100,13 +101,14 @@ const AuthButton = ({ setLoading, mode, redirect }) => {
   }
 
   return (
-    <Button
+    <LoadingButton
       variant="contained"
+      loading={loading}
       onClick={session.isSignedIn ? handleSignOut : handleSignIn}
       disableElevation
     >
       {session.isSignedIn ? "Logout" : "Login"}
-    </Button>
+    </LoadingButton>
   );
 };
 

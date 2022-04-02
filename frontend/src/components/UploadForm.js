@@ -34,6 +34,8 @@ function UploadForm() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  if (!user.isSignedIn) return null;
+
   const reset = () => {
     setTags([]);
     setSelected({});
@@ -272,7 +274,7 @@ function UploadForm() {
           formData.append("srcUrl", selected.data);
           break;
         default:
-          throw new Error("Illegal selected.type value.");
+          alert("Illegal selected.type value.");
       }
       formData.append("tags", JSON.stringify(tags));
       if (isPublic) {
@@ -340,7 +342,7 @@ function UploadForm() {
       <Dialog
         open={dialogOpen}
         onClose={handleDialogClose}
-        maxWidth="md"
+        maxWidth="sm"
         fullWidth
       >
         <DialogTitle>Upload</DialogTitle>
