@@ -1,10 +1,9 @@
 import {
   Button,
   ButtonBase,
+  Container,
   Dialog,
   IconButton,
-  ImageList,
-  ImageListItem,
   Stack,
   TextField,
 } from "@mui/material";
@@ -15,6 +14,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 import { useUser } from "../contexts/userContext";
+import { Masonry } from "@mui/lab";
 
 function ImageDisplay({ images }) {
   const [user] = useUser();
@@ -45,11 +45,22 @@ function ImageDisplay({ images }) {
     };
 
     return (
-      <ImageListItem>
+      <div style={{ textAlign: "center", display: "block" }}>
         <ButtonBase onClick={handleClick}>
-          <img src={srcUrl} srcSet={srcSetUrl} alt={title} loading="lazy" />
+          <img
+            src={srcUrl}
+            srcSet={srcSetUrl}
+            alt={title}
+            loading="lazy"
+            style={{
+              maxWidth: "20rem",
+              width: "100%",
+              maxHeight: "20rem",
+              height: "100%",
+            }}
+          />
         </ButtonBase>
-      </ImageListItem>
+      </div>
     );
   };
 
@@ -66,7 +77,7 @@ function ImageDisplay({ images }) {
 
     return (
       <Stack direction="row" spacing={1} alignItems="center">
-        <TextField disabled value={url} size="small" />
+        <TextField disabled value={url} size="small" fullWidth />
         <IconButton onClick={handleClick}>{displayIcon}</IconButton>
       </Stack>
     );
@@ -87,31 +98,45 @@ function ImageDisplay({ images }) {
           },
         })
         .then(() => {
-          images.splice(displayed.index, 1);
+          data.splice(displayed.index, 1);
           handleClose();
         });
     };
 
-    return <Button onClick={handleClick}>Delete</Button>;
+    return (
+      <Button onClick={handleClick} color="error" variant="contained">
+        Delete
+      </Button>
+    );
   };
 
   const handleClose = () => {
     setDialogOpen(false);
   };
 
-  return (
-    <>
-      <ImageList variant="masonry" cols={3} gap={8}>
-        {images.map((image, index) => {
-          image.index = index;
-          return <ListEntry key={image.id} image={image} />;
-        })}
-      </ImageList>
-      <Dialog open={dialogOpen} onClose={handleClose}>
-        <Stack spacing={1}>
+  const DialogContent = () => {
+    return (
+      <Container maxWidth="md" sx={{ paddingY: 3 }}>
+        <Stack spacing={2}>
           <UrlDisplay />
           <DeleteButton />
         </Stack>
+      </Container>
+    );
+  };
+
+  const data = images?.data ?? [];
+
+  return (
+    <>
+      <Masonry columns={4} spacing={2}>
+        {data.map((image, index) => {
+          image.index = index;
+          return <ListEntry key={image.id} image={image} />;
+        })}
+      </Masonry>
+      <Dialog open={dialogOpen} onClose={handleClose}>
+        <DialogContent />
       </Dialog>
     </>
   );

@@ -5,8 +5,6 @@ import { UserProvider } from "./contexts/userContext";
 import AuthButton from "./components/AuthButton";
 import { Route, Routes, useLocation } from "react-router-dom";
 import UploadForm from "./components/UploadForm";
-import SearchModule from "./components/SearchModule";
-import ImageDisplay from "./components/ImageDisplay";
 import AppBar from "./components/AppBar";
 import {
   Box,
@@ -21,6 +19,8 @@ import getTheme from "./theme";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import LoginPage from "./pages/LoginPage";
+import SecurityFilter from "./components/SecurityFilter";
+import SearchPage from "./pages/SearchPage";
 
 function initializeFirebase() {
   const firebaseConfig = {
@@ -71,9 +71,15 @@ function App() {
           </AppBar>
           <Routes>
             <Route path="/" element={<LoginPage />} />
+            <Route
+              path="/search"
+              element={
+                <SecurityFilter>
+                  <SearchPage data={data} setData={setData} />
+                </SecurityFilter>
+              }
+            />
           </Routes>
-          <SearchModule setResults={setData} />
-          <ImageDisplay images={data.data ?? []} />
         </UserProvider>
       </ThemeProvider>
     </StyledEngineProvider>

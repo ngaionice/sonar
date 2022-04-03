@@ -3,12 +3,12 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Container, Grid, Typography } from "@mui/material";
 import AuthButton from "../components/AuthButton";
 
-function LoginPage({}) {
+function LoginPage() {
   const [loading, setLoading] = useState(false);
   let navigate = useNavigate();
   let location = useLocation();
 
-  let from = location.state?.from?.pathname || "/home";
+  let from = location.state?.from?.pathname || "/search";
 
   const redirect = useCallback(() => {
     navigate(from);

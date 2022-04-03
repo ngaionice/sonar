@@ -49,18 +49,19 @@ function SearchModule({ setResults }) {
       <TextField
         autoFocus
         size="small"
-        label="Search"
+        label="Search term"
         onChange={handleTermChange}
         value={searchTerm}
+        fullWidth
       />
     );
   };
 
   const ModeButtons = () => {
     const modes = [
-      { v: 0, l: "Exact" },
-      { v: 1, l: "Insensitive" },
       { v: 2, l: "Partial" },
+      { v: 1, l: "Insensitive" },
+      { v: 0, l: "Exact" },
     ];
 
     return (
@@ -72,6 +73,7 @@ function SearchModule({ setResults }) {
               key={m.v}
               variant={mode === m.v ? "contained" : "outlined"}
               disableElevation
+              sx={{ height: "40px" }}
             >
               {m.l}
             </Button>
@@ -82,9 +84,9 @@ function SearchModule({ setResults }) {
   };
 
   return (
-    <Stack direction="row" spacing={1} alignItems="center">
-      <SearchField />
+    <Stack direction="row" spacing={2} alignItems="center">
       <ModeButtons />
+      <SearchField />
     </Stack>
   );
 }
