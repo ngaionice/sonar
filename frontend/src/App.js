@@ -21,6 +21,7 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import LoginPage from "./pages/LoginPage";
 import SecurityFilter from "./components/SecurityFilter";
 import SearchPage from "./pages/SearchPage";
+import SettingsModule from "./components/SettingsModule";
 
 function initializeFirebase() {
   const firebaseConfig = {
@@ -64,6 +65,7 @@ function App() {
             <Stack spacing={1} direction="row">
               <UploadForm />
               <BrightnessButton />
+              <SettingsModule />
               {location.pathname === "/" ? null : (
                 <AuthButton setLoading={() => {}} useIcon />
               )}

@@ -124,6 +124,7 @@ function ImageDisplay({ images }) {
     return (
       <Container maxWidth="md" sx={{ paddingY: 3 }}>
         <Stack spacing={2}>
+          <img src={displayed?.url ?? ""} alt="Upload preview" />
           <UrlDisplay />
           <DeleteButton />
         </Stack>
