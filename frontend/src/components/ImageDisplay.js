@@ -6,6 +6,7 @@ import {
   IconButton,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 import { useState } from "react";
 import axios from "axios";
@@ -45,7 +46,12 @@ function ImageDisplay({ images }) {
     };
 
     return (
-      <div style={{ textAlign: "center", display: "block" }}>
+      <div
+        style={{
+          textAlign: "center",
+          display: "block",
+        }}
+      >
         <ButtonBase onClick={handleClick}>
           <img
             src={srcUrl}
@@ -53,9 +59,9 @@ function ImageDisplay({ images }) {
             alt={title}
             loading="lazy"
             style={{
-              maxWidth: "20rem",
+              maxWidth: "18rem",
               width: "100%",
-              maxHeight: "20rem",
+              maxHeight: "18rem",
               height: "100%",
             }}
           />
@@ -98,7 +104,7 @@ function ImageDisplay({ images }) {
           },
         })
         .then(() => {
-          data.splice(displayed.index, 1);
+          images.data.splice(displayed.index, 1);
           handleClose();
         });
     };
@@ -125,12 +131,27 @@ function ImageDisplay({ images }) {
     );
   };
 
-  const data = images?.data ?? [];
+  if (!images?.data) {
+    return (
+      <Stack alignItems="center">
+        <Typography variant="body1">Start typing to search.</Typography>
+      </Stack>
+    );
+  }
+
+  if (images?.data && images.data.length < 1) {
+    const text = images?.data ? "No results found." : "Start typing to search.";
+    return (
+      <Stack alignItems="center">
+        <Typography variant="body1">{text}</Typography>
+      </Stack>
+    );
+  }
 
   return (
     <>
       <Masonry columns={4} spacing={2}>
-        {data.map((image, index) => {
+        {images.data.map((image, index) => {
           image.index = index;
           return <ListEntry key={image.id} image={image} />;
         })}
