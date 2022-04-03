@@ -34,6 +34,19 @@ function UploadForm() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  const uploadHotkeyListener = (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.code === "KeyA") {
+      setDialogOpen(true);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("keydown", uploadHotkeyListener);
+    return () => {
+      document.removeEventListener("keydown", uploadHotkeyListener);
+    };
+  }, []);
+
   if (!user.isSignedIn) return null;
 
   const reset = () => {
