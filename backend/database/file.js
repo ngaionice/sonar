@@ -39,9 +39,10 @@ async function insertImageTags(client, key, tags) {
  * - 0 for exact match for the input
  * - 1 for case-insensitive match for the input
  * - 2 for case-insensitive and/or starts with the input
+ * @param {number[]} role The role ids of the user
  * @return {Promise<any[]>}
  */
-async function searchImagesByTag(client, tag, mode) {
+async function searchImagesByTag(client, tag, mode, role) {
   let stmt;
 
   switch (mode) {
@@ -57,7 +58,7 @@ async function searchImagesByTag(client, tag, mode) {
     default:
       throw new Error("Invalid argument.");
   }
-  return await client.manyOrNone(stmt, [tag]);
+  return await client.manyOrNone(stmt, [tag, role[0]]); // TODO: in future, union this or something to search with multiple roles at once
 }
 
 /**

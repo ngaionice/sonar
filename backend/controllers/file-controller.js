@@ -57,7 +57,13 @@ const upload = (dbClient) =>
 const search = (dbClient) =>
   asyncHandler(async (req, res) => {
     const { term, mode } = req.query;
-    const results = await File.searchImagesByTag(dbClient, term, Number(mode));
+    // TODO: in the future, update file search statement so we can union all images this user can access
+    const results = await File.searchImagesByTag(
+      dbClient,
+      term,
+      Number(mode),
+      req.userRoles ?? []
+    );
     const expiry = String(Math.floor(Date.now() / 1000));
     results.forEach((r) => {
       if (!r.usecache) {
@@ -71,6 +77,15 @@ const search = (dbClient) =>
 const remove = (dbClient) =>
   asyncHandler(async (req, res) => {
     const { keys: keysString } = req.query;
+
+    if (
+      !req.userRoles ||
+      !Array.isArray(req.userRoles) ||
+      !req.userRoles.includes(1)
+    ) {
+      res.sendStatus(401);
+    }
+
     const keys = JSON.parse(keysString);
     if (!Array.isArray(keys)) {
       res.status(400).message("Invalid keys.");

@@ -24,11 +24,12 @@ const insertImageCacheStmt =
  *
  * Params:
  * 1. search term
+ * 2. user's role id
  *
  * Search for images with a tag the starts with the search term, and is case-insensitive
  */
 const searchImagesApproximateStmt =
-  "select distinct i.id, useCache, cacheUrl as url from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag ilike concat($1, '%')";
+  "select distinct i.id, useCache, cacheUrl as url from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag ilike concat($1, '%') and mod(i.readroles, $2) = 0";
 
 /**
  * Returns the following fields:
@@ -38,11 +39,12 @@ const searchImagesApproximateStmt =
  *
  * Params:
  * 1. search term
+ * 2. user's role id
  *
  * Search for images with a tag matching the search term, case-insensitive
  */
 const searchImagesInsensitiveStmt =
-  "select distinct i.id, useCache, cacheUrl as url from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag ilike $1";
+  "select distinct i.id, useCache, cacheUrl as url from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag ilike $1 and mod(i.readroles, $2) = 0";
 
 /**
  * Returns the following fields:
@@ -52,11 +54,12 @@ const searchImagesInsensitiveStmt =
  *
  * Params:
  * 1. search term
+ * 2. user's role id
  *
  * Search for images with a tag matching the search term, case-sensitive
  */
 const searchImagesExactStmt =
-  "select distinct i.id, useCache, cacheUrl as url from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag = $1";
+  "select distinct i.id, useCache, cacheUrl as url from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag = $1 and mod(i.readroles, $2) = 0";
 
 /**
  * Params:

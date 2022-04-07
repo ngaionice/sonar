@@ -16,12 +16,14 @@ const verifyToken = (dbClient) =>
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         const user = await User.findByEmail(dbClient, decoded.email);
+        const roles = await User.getRoles(dbClient, decoded.email);
 
         if (!user) {
           res.status(401).message("Unauthorized.");
           return;
         } else {
           req.user = user;
+          req.userRoles = roles ? roles.map(({ id }) => id) : [];
         }
 
         next();

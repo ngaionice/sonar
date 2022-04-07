@@ -6,6 +6,9 @@ const findByEmailStmt = "select * from Individual where email = $1";
 
 const getHostStmt = "select * from ServerToken";
 
+const getRolesStmt =
+  "select r.id from Role r join IndividualRole ir on r.title = ir.title where ir.email = $1";
+
 /**
  * Params:
  * 1. email
@@ -30,6 +33,7 @@ const updateHostTokensStmt =
 export {
   findByEmailStmt,
   getHostStmt,
+  getRolesStmt,
   insertStmt,
   updateIdTokenStmt,
   updateHostTokensStmt,

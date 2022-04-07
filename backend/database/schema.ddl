@@ -18,16 +18,22 @@ create table Individual (
     name string not null
 );
 
-create table IndividualPermission (
-    token string not null references Individual (email) on delete cascade,
-    permission string(6) not null,
-    primary key (token, permission)
+create table Role (
+    title string primary key,
+    id int unique not null
+);
+
+create table IndividualRole (
+    email string references Individual (email),
+    title string references Role (title),
+    primary key (email, title)
 );
 
 create table Image (
     id string primary key, -- the key (i.e. file name) on S3 bucket
     mainUrl string not null, -- the URL to access the resource on S3
-    useCache boolean default false -- whether this file should be on imgur
+    useCache boolean default false, -- whether this file should be on imgur
+    readRoles int not null default 1
 );
 
 create table ImageCache (

@@ -1,6 +1,7 @@
 import {
   findByEmailStmt,
   getHostStmt,
+  getRolesStmt,
   insertStmt,
   updateHostTokensStmt,
   updateIdTokenStmt,
@@ -8,6 +9,10 @@ import {
 
 async function findByEmail(client, email) {
   return await client.oneOrNone(findByEmailStmt, [email]);
+}
+
+async function getRoles(client, email) {
+  return await client.manyOrNone(getRolesStmt, [email]);
 }
 
 async function getHost(client) {
@@ -26,4 +31,11 @@ async function updateHostTokens(client, idToken, refreshToken) {
   await client.none(updateHostTokensStmt, [idToken, refreshToken]);
 }
 
-export { getHost, findByEmail, insert, updateIdToken, updateHostTokens };
+export {
+  getHost,
+  getRoles,
+  findByEmail,
+  insert,
+  updateIdToken,
+  updateHostTokens,
+};
