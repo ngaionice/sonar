@@ -9,6 +9,15 @@ import {
 
 const upload = (dbClient) =>
   asyncHandler(async (req, res) => {
+    if (
+      !req.userRoles ||
+      !Array.isArray(req.userRoles) ||
+      !req.userRoles.includes(1)
+    ) {
+      res.sendStatus(401);
+      return;
+    }
+
     let data;
     try {
       if (req.file) data = getDataFromUpload(req, res);
@@ -84,6 +93,7 @@ const remove = (dbClient) =>
       !req.userRoles.includes(1)
     ) {
       res.sendStatus(401);
+      return;
     }
 
     const keys = JSON.parse(keysString);
