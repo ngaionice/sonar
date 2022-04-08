@@ -28,13 +28,14 @@ const login = async (auth, provider, dispatchSession, serverUrl) => {
   const serverLoginResult = await axios.post(`${serverUrl}/api/users/login`, {
     token: credential.idToken,
   });
-  const { token, name } = serverLoginResult.data;
+  const { token, name, isAdmin } = serverLoginResult.data;
   dispatchSession({
     type: "signIn",
     payload: {
       token,
       name,
       imageUrl,
+      isAdmin,
     },
   });
 };

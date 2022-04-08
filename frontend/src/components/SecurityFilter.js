@@ -1,12 +1,17 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useUser } from "../contexts/userContext";
+import ErrorPage from "../pages/ErrorPage";
 
-function SecurityFilter({ children }) {
-  let auth = useUser();
+function SecurityFilter({ children, adminOnly }) {
+  let [user] = useUser();
   let location = useLocation();
 
-  if (!auth[0].token) {
+  if (!user.token) {
     return <Navigate to="/" state={{ from: location }} replace />;
+  }
+
+  if (adminOnly && !user.isAdmin) {
+    return <ErrorPage />;
   }
 
   return children;
