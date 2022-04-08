@@ -12,16 +12,14 @@ import {
   Stack,
   StyledEngineProvider,
   ThemeProvider,
-  Tooltip,
-  IconButton,
 } from "@mui/material";
 import getTheme from "./theme";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import LightModeIcon from "@mui/icons-material/LightMode";
 import LoginPage from "./pages/LoginPage";
 import SecurityFilter from "./components/SecurityFilter";
 import SearchPage from "./pages/SearchPage";
 import SettingsModule from "./components/SettingsModule";
+import { SettingsProvider, useSettings } from "./contexts/settingsContext";
+import ThemeModule from "./components/ThemeModule";
 
 function initializeFirebase() {
   const firebaseConfig = {
@@ -36,6 +34,17 @@ function initializeFirebase() {
   initializeApp(firebaseConfig);
 }
 
+function ThemedApp({ children }) {
+  const [settings] = useSettings();
+  return (
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={getTheme(settings.darkMode)}>
+        {children}
+      </ThemeProvider>
+    </StyledEngineProvider>
+  );
+}
+
 function App() {
   const initialized = useRef(false);
   if (!initialized.current) {
@@ -44,27 +53,18 @@ function App() {
   }
 
   const [data, setData] = useState([]);
-  const [darkMode, setDarkMode] = useState(false);
   let location = useLocation();
 
-  const BrightnessButton = () => (
-    <Tooltip title={"Toggle theme"} arrow>
-      <IconButton onClick={() => setDarkMode(!darkMode)}>
-        {darkMode ? <DarkModeIcon /> : <LightModeIcon />}
-      </IconButton>
-    </Tooltip>
-  );
-
   return (
-    <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={getTheme(darkMode)}>
-        <UserProvider>
+    <UserProvider>
+      <SettingsProvider>
+        <ThemedApp>
           <CssBaseline />
           <AppBar>
             <Box sx={{ flexGrow: 1 }} />
             <Stack spacing={1} direction="row">
               <UploadForm />
-              <BrightnessButton />
+              <ThemeModule />
               <SettingsModule />
               {location.pathname === "/" ? null : (
                 <AuthButton setLoading={() => {}} useIcon />
@@ -82,9 +82,9 @@ function App() {
               }
             />
           </Routes>
-        </UserProvider>
-      </ThemeProvider>
-    </StyledEngineProvider>
+        </ThemedApp>
+      </SettingsProvider>
+    </UserProvider>
   );
 }
 

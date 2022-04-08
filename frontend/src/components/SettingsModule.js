@@ -9,33 +9,23 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import SettingsIcon from "@mui/icons-material/Settings";
+import { useSettings } from "../contexts/settingsContext";
 
-function SettingsModule({ successCallback }) {
-  const [open, setOpen] = useState(!localStorage.getItem("hostAddress"));
+function SettingsModule() {
+  const [settings, dispatchSettings] = useSettings();
+  const [open, setOpen] = useState(!settings.serverUrl);
 
-  const [serverAddress, setServerAddress] = useState(
-    localStorage.getItem("hostAddress") ?? ""
-  );
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      localStorage.setItem("hostAddress", serverAddress);
-    }, 300);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [serverAddress]);
+  const [serverAddress, setServerAddress] = useState(settings.serverUrl);
 
   const handleClose = () => {
-    if (localStorage.getItem("hostAddress")) setOpen(false);
+    if (settings.serverUrl) setOpen(false);
   };
 
   const handleSave = () => {
-    localStorage.setItem("hostAddress", serverAddress);
+    dispatchSettings({ type: "setServerUrl", payload: serverAddress });
     handleClose();
   };
 
