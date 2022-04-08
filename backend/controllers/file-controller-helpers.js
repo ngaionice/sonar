@@ -87,4 +87,11 @@ const getDataFromUrl = async (req, res) => {
   };
 };
 
-export { getDataFromUpload, getDataFromUrl };
+/**
+ *
+ * @param {number[]} roles The roles array.
+ * @return {boolean} True if the roles array indicates that the user is an array, false otherwise.
+ */
+const isAdmin = (roles) => roles && Array.isArray(roles) && roles.includes(1);
+
+export { getDataFromUpload, getDataFromUrl, isAdmin };

@@ -5,15 +5,12 @@ import * as File from "../database/file.js";
 import {
   getDataFromUpload,
   getDataFromUrl,
+  isAdmin,
 } from "./file-controller-helpers.js";
 
 const upload = (dbClient) =>
   asyncHandler(async (req, res) => {
-    if (
-      !req.userRoles ||
-      !Array.isArray(req.userRoles) ||
-      !req.userRoles.includes(1)
-    ) {
+    if (!isAdmin(req.user.roles)) {
       res.sendStatus(401);
       return;
     }
@@ -71,7 +68,7 @@ const search = (dbClient) =>
       dbClient,
       term,
       Number(mode),
-      req.userRoles ?? []
+      req.user.roles ?? []
     );
     const expiry = String(Math.floor(Date.now() / 1000));
     results.forEach((r) => {
@@ -87,11 +84,7 @@ const remove = (dbClient) =>
   asyncHandler(async (req, res) => {
     const { keys: keysString } = req.query;
 
-    if (
-      !req.userRoles ||
-      !Array.isArray(req.userRoles) ||
-      !req.userRoles.includes(1)
-    ) {
+    if (!isAdmin(req.user.roles)) {
       res.sendStatus(401);
       return;
     }

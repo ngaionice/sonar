@@ -24,8 +24,8 @@ create table Role (
 );
 
 create table IndividualRole (
-    email string references Individual (email),
-    title string references Role (title),
+    email string references Individual (email) on delete cascade,
+    title string references Role (title) on delete restrict,
     primary key (email, title)
 );
 

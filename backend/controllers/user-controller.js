@@ -6,6 +6,7 @@ import {
 } from "firebase/auth";
 import generateToken from "../utils/generate-token.js";
 import * as Individual from "../database/user.js";
+import { isAdmin } from "./file-controller-helpers.js";
 
 // Takes in an ID token from Google OAuth, and verifies it. If valid, returns the token payload, else throws an error.
 const verifyUser = async (token) => {
@@ -61,7 +62,64 @@ const loginUser = (dbClient) =>
     }
   });
 
-export { loginUser };
+const getAllUsers = (dbClient) =>
+  asyncHandler(async (req, res) => {
+    if (!isAdmin(req.user.roles)) {
+      res.sendStatus(401);
+      return;
+    }
+    const users = await Individual.getAllUsers(dbClient);
+    res.status(200).json({ users });
+  });
+
+const getUser = (dbClient) =>
+  asyncHandler(async (req, res) => {
+    const { email } = req.query;
+    if (email !== req.user.email && !isAdmin(req.user.roles)) {
+      res.sendStatus(401);
+      return;
+    }
+    const user = await Individual.getUser(dbClient, email);
+    res.status(200).json({ user });
+  });
+
+const insertUser = (dbClient) =>
+  asyncHandler(async (req, res) => {
+    if (!isAdmin(req.user.roles)) {
+      res.sendStatus(401);
+      return;
+    }
+    const { email, name, roles } = req.body;
+    await Individual.insertUser(dbClient, email, name, JSON.parse(roles));
+    res.sendStatus(201);
+  });
+
+const updateUser = (dbClient) =>
+  asyncHandler(async (req, res) => {
+    if (!isAdmin(req.user.roles)) {
+      res.sendStatus(401);
+      return;
+    }
+    const { email, name, roles } = req.body;
+    await Individual.updateUser(dbClient, email, {
+      name,
+      roles: JSON.parse(roles),
+    });
+    res.sendStatus(200);
+  });
+
+const deleteUser = (dbClient) =>
+  asyncHandler(async (req, res) => {
+    if (!isAdmin(req.user.roles)) {
+      res.sendStatus(401);
+      return;
+    }
+    const { email } = req.query;
+    await Individual.deleteUser(dbClient, email);
+    res.sendStatus(200);
+  });
+
+export { loginUser, getUser, getAllUsers, insertUser, updateUser, deleteUser };
 
 // new auth flow design:
 // initialize owner's email in database (in servertoken table); set other values to whatever
