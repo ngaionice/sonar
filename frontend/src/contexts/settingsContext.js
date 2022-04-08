@@ -27,7 +27,7 @@ function reducer(state, action) {
         darkMode: !!action.payload,
       };
     case "setServerUrl":
-      if (!(action.payload instanceof String)) {
+      if (typeof action.payload !== "string") {
         throw new Error("Invalid server url type. Expected type String.");
       }
       localStorage.setItem(storageVariables.serverUrl, action.payload);
