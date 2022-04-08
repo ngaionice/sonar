@@ -2,9 +2,11 @@ import { Button, ButtonGroup, Stack, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useUser } from "../contexts/userContext";
+import { useSettings } from "../contexts/settingsContext";
 
 function SearchModule({ setResults }) {
   const [user] = useUser();
+  const [settings] = useSettings();
   const [searchTerm, setSearchTerm] = useState("");
   const [mode, setMode] = useState(2);
 
@@ -12,7 +14,7 @@ function SearchModule({ setResults }) {
     let changed = false;
 
     const search = async () => {
-      return await axios.get("http://localhost:8000/api/files/search", {
+      return await axios.get(`${settings.serverUrl}/api/files/search`, {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },

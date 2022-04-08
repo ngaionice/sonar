@@ -12,8 +12,9 @@ import { useUser } from "../contexts/userContext";
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { LoadingButton } from "@mui/lab";
+import { useSettings } from "../contexts/settingsContext";
 
-const login = async (auth, provider, dispatchSession) => {
+const login = async (auth, provider, dispatchSession, serverUrl) => {
   const result = await signInWithPopup(auth, provider);
 
   // TODO: handle error codes from here: https://firebase.google.com/docs/reference/js/v8/firebase.auth.Auth#signinwithpopup
@@ -24,12 +25,9 @@ const login = async (auth, provider, dispatchSession) => {
   const imageUrl = result.user.photoURL;
   const credential = GoogleAuthProvider.credentialFromResult(result);
 
-  const serverLoginResult = await axios.post(
-    "http://localhost:8000/api/users/login",
-    {
-      token: credential.idToken,
-    }
-  );
+  const serverLoginResult = await axios.post(`${serverUrl}/api/users/login`, {
+    token: credential.idToken,
+  });
   const { token, name } = serverLoginResult.data;
   dispatchSession({
     type: "signIn",
@@ -57,6 +55,7 @@ const logout = (auth, dispatchSession) => {
 const AuthButton = ({ loading, setLoading, useIcon, redirect }) => {
   const navigate = useNavigate();
   const [session, dispatchSession] = useUser();
+  const [settings] = useSettings();
 
   const provider = new GoogleAuthProvider();
   provider.addScope("https://www.googleapis.com/auth/userinfo.email");
@@ -67,7 +66,7 @@ const AuthButton = ({ loading, setLoading, useIcon, redirect }) => {
 
   const handleSignIn = () => {
     setLoading(true);
-    login(auth, provider, dispatchSession)
+    login(auth, provider, dispatchSession, settings.serverUrl)
       .then(() => {
         redirect();
       })

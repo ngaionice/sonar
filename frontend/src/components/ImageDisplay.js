@@ -16,9 +16,11 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 import { useUser } from "../contexts/userContext";
 import { Masonry } from "@mui/lab";
+import { useSettings } from "../contexts/settingsContext";
 
 function ImageDisplay({ images }) {
   const [user] = useUser();
+  const [settings] = useSettings();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [displayed, setDisplayed] = useState(null);
@@ -95,7 +97,7 @@ function ImageDisplay({ images }) {
 
     const handleClick = () => {
       axios
-        .delete("http://localhost:8000/api/files/delete", {
+        .delete(`${settings.serverUrl}/api/files/delete`, {
           headers: {
             Authorization: `Bearer ${user.token}`,
           },

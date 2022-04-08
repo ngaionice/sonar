@@ -24,9 +24,11 @@ import CodeIcon from "@mui/icons-material/Code";
 import LinkIcon from "@mui/icons-material/Link";
 import StyleIcon from "@mui/icons-material/Style";
 import { LoadingButton } from "@mui/lab";
+import { useSettings } from "../contexts/settingsContext";
 
 function UploadForm() {
   const [user] = useUser();
+  const [settings] = useSettings();
   const [selected, setSelected] = useState({});
   const [isPublic, setIsPublic] = useState(false);
   const [uploadMode, setUploadMode] = useState(0);
@@ -301,7 +303,7 @@ function UploadForm() {
       };
 
       axios
-        .post("http://localhost:8000/api/files/upload", formData, config)
+        .post(`${settings.serverUrl}/api/files/upload`, formData, config)
         .catch((e) => {
           // TODO: some error handling?
           console.log(e);
