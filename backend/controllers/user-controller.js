@@ -62,6 +62,17 @@ const loginUser = (dbClient) =>
     }
   });
 
+const getAllRoles = (dbClient) =>
+  asyncHandler(async (req, res) => {
+    if (!isAdmin(req.user.roles)) {
+      res.sendStatus(401);
+      return;
+    }
+    const rawRoles = await Individual.getAllRoles(dbClient);
+    const roles = rawRoles.map((r) => r.title);
+    res.status(200).json({ roles });
+  });
+
 const getAllUsers = (dbClient) =>
   asyncHandler(async (req, res) => {
     if (!isAdmin(req.user.roles)) {
@@ -103,7 +114,7 @@ const updateUser = (dbClient) =>
     const { email, name, roles } = req.body;
     await Individual.updateUser(dbClient, email, {
       name,
-      roles: JSON.parse(roles),
+      roles,
     });
     res.sendStatus(200);
   });
@@ -119,7 +130,15 @@ const deleteUser = (dbClient) =>
     res.sendStatus(200);
   });
 
-export { loginUser, getUser, getAllUsers, insertUser, updateUser, deleteUser };
+export {
+  loginUser,
+  getUser,
+  getAllUsers,
+  getAllRoles,
+  insertUser,
+  updateUser,
+  deleteUser,
+};
 
 // new auth flow design:
 // initialize owner's email in database (in servertoken table); set other values to whatever

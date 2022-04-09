@@ -2,9 +2,10 @@ import {
   deleteUserRolesStmt,
   deleteUserStmt,
   findByEmailStmt,
+  getAllRolesStmt,
   getAllUsersStmt,
   getHostStmt,
-  getRolesStmt,
+  getUserRolesStmt,
   getUserStmt,
   insertUserRoleStmt,
   insertUserStmt,
@@ -25,8 +26,12 @@ async function findByEmail(client, email) {
   return await client.oneOrNone(findByEmailStmt, [email]);
 }
 
-async function getRoles(client, email) {
-  return await client.manyOrNone(getRolesStmt, [email]);
+async function getUserRoles(client, email) {
+  return await client.manyOrNone(getUserRolesStmt, [email]);
+}
+
+async function getAllRoles(client) {
+  return await client.many(getAllRolesStmt);
 }
 
 /**
@@ -48,7 +53,7 @@ async function getAllUsers(client) {
     } else {
       users[email] = {};
       users[email].name = name;
-      users[email].roles = [role];
+      users[email].roles = row.role ? [row.role] : [];
     }
   });
   return users;
@@ -71,7 +76,7 @@ async function getUser(client, email) {
     if (!user.email) {
       user.email = row.email;
       user.name = row.name;
-      user.roles = [row.role];
+      user.roles = row.role ? [row.role] : [];
     } else {
       user.roles.push(row.role);
     }
@@ -124,7 +129,7 @@ async function updateUser(client, email, changes) {
     }
     if (changes.roles) {
       await t.none(deleteUserRolesStmt, [email]);
-      for (const r of roles) {
+      for (const r of changes.roles) {
         await t.none(insertUserRoleStmt, [email, r]);
       }
     }
@@ -137,9 +142,10 @@ async function deleteUser(client, email) {
 
 export {
   deleteUser,
+  getAllRoles,
   getAllUsers,
   getHost,
-  getRoles,
+  getUserRoles,
   getUser,
   findByEmail,
   insertUser,

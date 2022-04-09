@@ -1,6 +1,7 @@
 import express from "express";
 import {
   deleteUser,
+  getAllRoles,
   getAllUsers,
   getUser,
   insertUser,
@@ -15,12 +16,13 @@ const getRouter = (dbClient) => {
   router.post("/login", loginUser(dbClient));
   router.use(auth(dbClient));
   router
-    .route("/user")
+    .route("/one")
     .get(getUser(dbClient))
     .post(insertUser(dbClient))
     .put(updateUser(dbClient))
     .delete(deleteUser(dbClient));
-  router.route("/users").get(getAllUsers(dbClient));
+  router.route("/all").get(getAllUsers(dbClient));
+  router.route("/roles").get(getAllRoles(dbClient));
   return router;
 };
 

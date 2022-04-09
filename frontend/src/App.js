@@ -20,6 +20,7 @@ import SearchPage from "./pages/SearchPage";
 import SettingsModule from "./components/SettingsModule";
 import { SettingsProvider, useSettings } from "./contexts/settingsContext";
 import ThemeModule from "./components/ThemeModule";
+import ManageUsersPage from "./pages/ManageUsersPage";
 
 function initializeFirebase() {
   const firebaseConfig = {
@@ -78,6 +79,14 @@ function App() {
               element={
                 <SecurityFilter>
                   <SearchPage data={data} setData={setData} />
+                </SecurityFilter>
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                <SecurityFilter adminOnly>
+                  <ManageUsersPage />
                 </SecurityFilter>
               }
             />

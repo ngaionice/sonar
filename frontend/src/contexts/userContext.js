@@ -3,11 +3,11 @@ import { createContext, useContext, useMemo, useReducer } from "react";
 function sessionReducer(state, action) {
   switch (action.type) {
     case "signIn":
-      const { token, name, imageUrl } = action.payload;
+      const { token, name, imageUrl, isAdmin } = action.payload;
       if (!token) {
         throw new Error("No token provided when signing in.");
       }
-      return { isSignedIn: true, token, name, imageUrl };
+      return { isSignedIn: true, token, name, imageUrl, isAdmin };
     case "signOut":
       return { isSignedIn: false };
     default:

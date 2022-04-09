@@ -6,18 +6,20 @@ const findByEmailStmt = "select * from Individual where email = $1";
 
 const getHostStmt = "select * from ServerToken";
 
-const getRolesStmt =
+const getUserRolesStmt =
   "select r.id from Role r join IndividualRole ir on r.title = ir.title where ir.email = $1";
 
 const getAllUsersStmt =
-  "select i.email, i.name, r.title as role from Individual i join IndividualRole ir on i.email = ir.email join Role r on ir.title = r.title";
+  "select i.email, i.name, r.title as role from Individual i left join IndividualRole ir on i.email = ir.email left join Role r on ir.title = r.title";
+
+const getAllRolesStmt = "select * from Role";
 
 /**
  * Params:
  * 1. email
  */
 const getUserStmt =
-  "select i.email, i.name, r.title as role from Individual i join IndividualRole ir on i.email = ir.email join Role r on ir.title = r.title where i.email = $1";
+  "select i.email, i.name, r.title as role from Individual i left join IndividualRole ir on i.email = ir.email left join Role r on ir.title = r.title where i.email = $1";
 
 /**
  * Params:
@@ -73,7 +75,8 @@ export {
   findByEmailStmt,
   getAllUsersStmt,
   getHostStmt,
-  getRolesStmt,
+  getAllRolesStmt,
+  getUserRolesStmt,
   getUserStmt,
   insertUserStmt,
   insertUserRoleStmt,
