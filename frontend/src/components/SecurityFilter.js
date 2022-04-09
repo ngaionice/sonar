@@ -9,7 +9,6 @@ function SecurityFilter({ children, adminOnly }) {
   if (!user.token) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
-  console.log(user);
   if (adminOnly && !user.isAdmin) {
     return <ErrorPage />;
   }

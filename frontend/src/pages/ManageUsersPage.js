@@ -46,7 +46,6 @@ function UserEntry({ email, details, availableRoles, serverUrl, userToken }) {
   };
 
   const DialogContent = () => {
-    console.log("render");
     const handleNameChange = (e) => {
       setCurrName(e.target.value);
     };
