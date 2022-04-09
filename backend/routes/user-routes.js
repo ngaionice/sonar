@@ -4,6 +4,7 @@ import {
   getAllRoles,
   getAllUsers,
   getUser,
+  insertRole,
   insertUser,
   loginUser,
   updateUser,
@@ -23,6 +24,7 @@ const getRouter = (dbClient) => {
     .delete(deleteUser(dbClient));
   router.route("/all").get(getAllUsers(dbClient));
   router.route("/roles").get(getAllRoles(dbClient));
+  router.route("/role").post(insertRole(dbClient));
   return router;
 };
 

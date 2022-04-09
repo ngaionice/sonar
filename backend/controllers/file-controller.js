@@ -6,7 +6,7 @@ import {
   getDataFromUpload,
   getDataFromUrl,
   isAdmin,
-} from "./file-controller-helpers.js";
+} from "./controller-helpers.js";
 
 const upload = (dbClient) =>
   asyncHandler(async (req, res) => {

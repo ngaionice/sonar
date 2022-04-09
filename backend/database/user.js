@@ -7,6 +7,7 @@ import {
   getHostStmt,
   getUserRolesStmt,
   getUserStmt,
+  insertRoleStmt,
   insertUserRoleStmt,
   insertUserStmt,
   updateHostTokensStmt,
@@ -30,6 +31,11 @@ async function getUserRoles(client, email) {
   return await client.manyOrNone(getUserRolesStmt, [email]);
 }
 
+/**
+ * Returns a list of all roles, sorted by the value of the role id (descending)
+ * @param client
+ * @return {Promise<*|any[]>}
+ */
 async function getAllRoles(client) {
   return await client.many(getAllRolesStmt);
 }
@@ -105,6 +111,10 @@ async function insertUser(client, email, name, roles) {
   });
 }
 
+async function insertRole(client, title, id) {
+  await client.none(insertRoleStmt, [title, id]);
+}
+
 async function updateIdToken(client, idToken) {
   await client.none(updateIdTokenStmt, [idToken]);
 }
@@ -148,6 +158,7 @@ export {
   getUserRoles,
   getUser,
   findByEmail,
+  insertRole,
   insertUser,
   updateIdToken,
   updateHostTokens,

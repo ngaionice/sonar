@@ -94,4 +94,26 @@ const getDataFromUrl = async (req, res) => {
  */
 const isAdmin = (roles) => roles && Array.isArray(roles) && roles.includes("1");
 
-export { getDataFromUpload, getDataFromUrl, isAdmin };
+/**
+ * Returns the next prime number. Code borrowed from Wikipedia page: Primality test
+ * @param {number} start
+ */
+function getNextPrime(start) {
+  if (start < 2) return 2;
+  if (start < 3) return 3;
+  for (let num = start; num < 2 * start; num++) {
+    if (num <= 3) continue;
+    if (num % 2 === 0 || num % 3 === 0) continue;
+
+    let count = 5;
+    while (Math.pow(count, 2) <= num) {
+      if (num % count === 0 || num % (count + 2) === 0) continue;
+      count += 6;
+    }
+
+    return num;
+  }
+  throw new Error("Failed to find next prime.");
+}
+
+export { getDataFromUpload, getDataFromUrl, getNextPrime, isAdmin };

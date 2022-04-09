@@ -6,7 +6,7 @@ import {
 } from "firebase/auth";
 import generateToken from "../utils/generate-token.js";
 import * as Individual from "../database/user.js";
-import { isAdmin } from "./file-controller-helpers.js";
+import { getNextPrime, isAdmin } from "./controller-helpers.js";
 
 // Takes in an ID token from Google OAuth, and verifies it. If valid, returns the token payload, else throws an error.
 const verifyUser = async (token) => {
@@ -94,6 +94,21 @@ const getUser = (dbClient) =>
     res.status(200).json({ user });
   });
 
+const insertRole = (dbClient) =>
+  asyncHandler(async (req, res) => {
+    if (!isAdmin(req.user.roles)) {
+      res.sendStatus(401);
+      return;
+    }
+    const { name } = req.body;
+    const currRoles = await Individual.getAllRoles(dbClient);
+    const maxPrime = currRoles[0].id;
+    const nextPrime = getNextPrime(maxPrime);
+    console.log(`prime: ${nextPrime}`);
+    await Individual.insertRole(dbClient, name, nextPrime);
+    res.sendStatus(201);
+  });
+
 const insertUser = (dbClient) =>
   asyncHandler(async (req, res) => {
     if (!isAdmin(req.user.roles)) {
@@ -101,7 +116,7 @@ const insertUser = (dbClient) =>
       return;
     }
     const { email, name, roles } = req.body;
-    await Individual.insertUser(dbClient, email, name, JSON.parse(roles));
+    await Individual.insertUser(dbClient, email, name, roles);
     res.sendStatus(201);
   });
 
@@ -135,6 +150,7 @@ export {
   getUser,
   getAllUsers,
   getAllRoles,
+  insertRole,
   insertUser,
   updateUser,
   deleteUser,

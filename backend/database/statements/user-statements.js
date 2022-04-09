@@ -12,7 +12,7 @@ const getUserRolesStmt =
 const getAllUsersStmt =
   "select i.email, i.name, r.title as role from Individual i left join IndividualRole ir on i.email = ir.email left join Role r on ir.title = r.title";
 
-const getAllRolesStmt = "select * from Role";
+const getAllRolesStmt = "select * from Role order by id desc";
 
 /**
  * Params:
@@ -20,6 +20,8 @@ const getAllRolesStmt = "select * from Role";
  */
 const getUserStmt =
   "select i.email, i.name, r.title as role from Individual i left join IndividualRole ir on i.email = ir.email left join Role r on ir.title = r.title where i.email = $1";
+
+const insertRoleStmt = "insert into Role (title, id) values ($1, $2)";
 
 /**
  * Params:
@@ -78,6 +80,7 @@ export {
   getAllRolesStmt,
   getUserRolesStmt,
   getUserStmt,
+  insertRoleStmt,
   insertUserStmt,
   insertUserRoleStmt,
   updateIdTokenStmt,
