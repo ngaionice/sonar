@@ -12,6 +12,7 @@ async function getDatabaseClient(config = { log: false }) {
     const options = config.log ? { query } : {};
 
     const pgp = pgpUninitialized(options);
+    pgp.pg.types.setTypeParser(20, parseInt);
     const client = await pgp({
       connectionString: process.env.DB_URI.replace(
         "$env:appdata",

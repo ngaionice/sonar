@@ -4,8 +4,6 @@
  */
 const findByEmailStmt = "select * from Individual where email = $1";
 
-const getHostStmt = "select * from ServerToken";
-
 const getUserRolesStmt =
   "select r.id from Role r join IndividualRole ir on r.title = ir.title where ir.email = $1";
 
@@ -40,20 +38,6 @@ const insertUserRoleStmt =
 
 /**
  * Params:
- * 1. idToken
- */
-const updateIdTokenStmt = "update ServerToken set idToken = $1 where true";
-
-/**
- * Params:
- * 1. idToken
- * 2. refreshToken
- */
-const updateHostTokensStmt =
-  "update ServerToken set idToken = $1, refreshToken = $2 where true";
-
-/**
- * Params:
  * 1. email
  * 2. name
  */
@@ -76,14 +60,11 @@ export {
   deleteUserRolesStmt,
   findByEmailStmt,
   getAllUsersStmt,
-  getHostStmt,
   getAllRolesStmt,
   getUserRolesStmt,
   getUserStmt,
   insertRoleStmt,
   insertUserStmt,
   insertUserRoleStmt,
-  updateIdTokenStmt,
-  updateHostTokensStmt,
   updateUserNameStmt,
 };

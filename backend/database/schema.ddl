@@ -5,14 +5,6 @@ create database if not exists trie;
 
 use trie;
 
--- there should only be 1 entry in this table; maybe we don't even want a table?
-create table ServerToken (
-    email string primary key,
-    idToken string not null,
-    refreshToken string not null,
-    lastExported timestamptz not null
-);
-
 create table Individual (
     email string primary key,
     name string not null
@@ -32,7 +24,7 @@ create table IndividualRole (
 create table Image (
     id string primary key, -- the key (i.e. file name) on S3 bucket
     mainUrl string not null, -- the URL to access the resource on S3
-    useCache boolean default false, -- whether this file should be on imgur
+    useCache boolean not null default false, -- whether this file should be on imgur
     readRoles int not null default 1
 );
 
@@ -46,4 +38,11 @@ create table ImageTag (
     imageId string references Image (id) on delete cascade,
     tag string,
     primary key (imageId, tag)
+);
+
+create table RefreshToken (
+    token string primary key,
+    email string not null references Individual (email) on delete cascade,
+    revoked boolean not null default false,
+    createdAt timestamptz not null default current_timestamp
 );

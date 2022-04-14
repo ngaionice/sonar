@@ -89,10 +89,10 @@ const getDataFromUrl = async (req, res) => {
 
 /**
  *
- * @param {string[]} roles The roles array.
+ * @param {number[]} roles The roles array.
  * @return {boolean} True if the roles array indicates that the user is an array, false otherwise.
  */
-const isAdmin = (roles) => roles && Array.isArray(roles) && roles.includes("1");
+const isAdmin = (roles) => roles && Array.isArray(roles) && roles.includes(1);
 
 /**
  * Returns the next prime number. Code borrowed from Wikipedia page: Primality test

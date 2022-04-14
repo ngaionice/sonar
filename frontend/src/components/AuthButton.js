@@ -25,7 +25,7 @@ const login = async (auth, provider, dispatchSession, serverUrl) => {
   const imageUrl = result.user.photoURL;
   const credential = GoogleAuthProvider.credentialFromResult(result);
 
-  const serverLoginResult = await axios.post(`${serverUrl}/api/users/login`, {
+  const serverLoginResult = await axios.post(`${serverUrl}/api/auth/login`, {
     token: credential.idToken,
   });
   const { token, name, isAdmin } = serverLoginResult.data;

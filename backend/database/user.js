@@ -4,14 +4,11 @@ import {
   findByEmailStmt,
   getAllRolesStmt,
   getAllUsersStmt,
-  getHostStmt,
   getUserRolesStmt,
   getUserStmt,
   insertRoleStmt,
   insertUserRoleStmt,
   insertUserStmt,
-  updateHostTokensStmt,
-  updateIdTokenStmt,
   updateUserNameStmt,
 } from "./statements/user-statements.js";
 
@@ -59,7 +56,7 @@ async function getAllUsers(client) {
     } else {
       users[email] = {};
       users[email].name = name;
-      users[email].roles = row.role ? [row.role] : [];
+      users[email].roles = role ? [role] : [];
     }
   });
   return users;
@@ -90,10 +87,6 @@ async function getUser(client, email) {
   return user;
 }
 
-async function getHost(client) {
-  return await client.one(getHostStmt);
-}
-
 /**
  *
  * @param client
@@ -113,14 +106,6 @@ async function insertUser(client, email, name, roles) {
 
 async function insertRole(client, title, id) {
   await client.none(insertRoleStmt, [title, id]);
-}
-
-async function updateIdToken(client, idToken) {
-  await client.none(updateIdTokenStmt, [idToken]);
-}
-
-async function updateHostTokens(client, idToken, refreshToken) {
-  await client.none(updateHostTokensStmt, [idToken, refreshToken]);
 }
 
 /**
@@ -154,13 +139,10 @@ export {
   deleteUser,
   getAllRoles,
   getAllUsers,
-  getHost,
   getUserRoles,
   getUser,
   findByEmail,
   insertRole,
   insertUser,
-  updateIdToken,
-  updateHostTokens,
   updateUser,
 };

@@ -1,9 +1,11 @@
 import jwt from "jsonwebtoken";
 
-const generateToken = (email) => {
-  return jwt.sign({ email }, process.env.JWT_SECRET, {
-    expiresIn: "90d",
-  });
+const generateAccessToken = ({ email, exp, roles }) => {
+  return jwt.sign({ email, exp, roles }, process.env.JWT_SECRET);
 };
 
-export default generateToken;
+const generateRefreshToken = ({ email, exp, roles }) => {
+  return jwt.sign({ email, exp, roles }, process.env.JWT_SECRET);
+};
+
+export { generateAccessToken, generateRefreshToken };

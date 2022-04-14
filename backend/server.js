@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import getDatabaseClient from "./clients/database-client.js";
 import initializeFirebase from "./firebase.js";
 import cors from "cors";
+import authRoutes from "./routes/auth-routes.js";
 import userRoutes from "./routes/user-routes.js";
 import fileRoutes from "./routes/file-routes.js";
 
@@ -20,10 +21,7 @@ app.use(
   })
 );
 
-app.get("/health", (req, res) => {
-  res.status(200).json(new Date());
-});
-
+app.use("/api/auth", authRoutes(client));
 app.use("/api/users", userRoutes(client));
 app.use("/api/files", fileRoutes(client));
 
