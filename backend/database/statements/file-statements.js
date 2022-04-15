@@ -5,7 +5,7 @@
  * 3. useCache
  */
 const insertImageStmt =
-  "insert into Image (id, mainUrl, useCache) values ($1, $2, $3)";
+  "insert into Image (id, mainUrl, useCache, readRoles) values ($1, $2, $3, $4)";
 
 /**
  * Params:
@@ -26,40 +26,12 @@ const insertImageCacheStmt =
  * 1. search term
  * 2. user's role id
  *
- * Search for images with a tag the starts with the search term, and is case-insensitive
+ * Case-insensitive search for images with
+ * - a single-word tag that starts with the search term, or
+ * - a multi-word tag with at least 1 word starting with the search term
  */
-const searchImagesApproximateStmt =
-  "select distinct i.id, useCache, cacheUrl as url from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag ilike concat($1, '%') and mod(i.readroles, $2) = 0";
-
-/**
- * Returns the following fields:
- * - `id`
- * - `usecache`
- * - `url`
- *
- * Params:
- * 1. search term
- * 2. user's role id
- *
- * Search for images with a tag matching the search term, case-insensitive
- */
-const searchImagesInsensitiveStmt =
-  "select distinct i.id, useCache, cacheUrl as url from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag ilike $1 and mod(i.readroles, $2) = 0";
-
-/**
- * Returns the following fields:
- * - `id`
- * - `usecache`
- * - `url`
- *
- * Params:
- * 1. search term
- * 2. user's role id
- *
- * Search for images with a tag matching the search term, case-sensitive
- */
-const searchImagesExactStmt =
-  "select distinct i.id, useCache, cacheUrl as url from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where it.tag = $1 and mod(i.readroles, $2) = 0";
+const searchImagesStmt =
+  "select distinct i.id, useCache, cacheUrl as url from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where mod(i.readroles, $2) = 0 and it.tag ilike any (array[concat($1, '%'), concat('%_ ',$1)])";
 
 /**
  * Params:
@@ -77,9 +49,7 @@ const deleteImagesByKeyStmt = "delete from Image where id in ($1:csv)";
 export {
   insertImageStmt,
   insertImageCacheStmt,
-  searchImagesApproximateStmt,
-  searchImagesInsensitiveStmt,
-  searchImagesExactStmt,
+  searchImagesStmt,
   selectHashesByKeyStmt,
   deleteImagesByKeyStmt,
 };

@@ -30,14 +30,16 @@ const upload = (dbClient) =>
     const { key, url: awsUrl } = await AWS.upload(buffer, name);
     out.aws = awsUrl;
 
+    let readRoles = 1;
+    // TODO: update readRoles based on passed in values from request
     try {
-      await File.insertImage(dbClient, key, awsUrl, !!isPublic);
+      await File.insertImage(dbClient, key, awsUrl, !!isPublic, readRoles);
       await File.insertImageTags(dbClient, key, tags);
     } catch (e) {
       console.log("Tag insertion failed.");
       console.log(e);
       await AWS.remove([key]);
-      res.status(500).message("Database issue");
+      res.status(500).send("Database issue");
       return;
     }
 
@@ -52,7 +54,7 @@ const upload = (dbClient) =>
         await File.deleteImagesByKey(dbClient, [key]);
         console.log("Imgur upload failed.");
         console.log(e);
-        res.status(500).message("Imgur issue");
+        res.status(500).send("Imgur issue");
         return;
       }
     }
@@ -62,12 +64,11 @@ const upload = (dbClient) =>
 
 const search = (dbClient) =>
   asyncHandler(async (req, res) => {
-    const { term, mode } = req.query;
+    const { term } = req.query;
     // TODO: in the future, update file search statement so we can union all images this user can access
     const results = await File.searchImagesByTag(
       dbClient,
       term,
-      Number(mode),
       req.user.roles ?? []
     );
     const expiry = String(Math.floor(Date.now() / 1000));
@@ -91,7 +92,7 @@ const remove = (dbClient) =>
 
     const keys = JSON.parse(keysString);
     if (!Array.isArray(keys)) {
-      res.status(400).message("Invalid keys.");
+      res.status(400).send("Invalid keys.");
       return;
     }
 

@@ -2,16 +2,14 @@ import {
   deleteImagesByKeyStmt,
   insertImageCacheStmt,
   insertImageStmt,
-  searchImagesApproximateStmt,
-  searchImagesExactStmt,
-  searchImagesInsensitiveStmt,
+  searchImagesStmt,
   selectHashesByKeyStmt,
 } from "./statements/file-statements.js";
 
 import pgpUninitialized from "pg-promise";
 
-async function insertImage(client, key, url, isPublic) {
-  await client.none(insertImageStmt, [key, url, isPublic]);
+async function insertImage(client, key, url, isPublic, readRoles) {
+  await client.none(insertImageStmt, [key, url, isPublic, readRoles]);
 }
 
 async function insertImageCache(client, key, url, deleteHash) {
@@ -35,30 +33,11 @@ async function insertImageTags(client, key, tags) {
  *
  * @param client
  * @param {string} tag
- * @param {number} mode An integer to indicate which mode to use.
- * - 0 for exact match for the input
- * - 1 for case-insensitive match for the input
- * - 2 for case-insensitive and/or starts with the input
  * @param {number[]} role The role ids of the user
  * @return {Promise<any[]>}
  */
-async function searchImagesByTag(client, tag, mode, role) {
-  let stmt;
-
-  switch (mode) {
-    case 0:
-      stmt = searchImagesExactStmt;
-      break;
-    case 1:
-      stmt = searchImagesInsensitiveStmt;
-      break;
-    case 2:
-      stmt = searchImagesApproximateStmt;
-      break;
-    default:
-      throw new Error("Invalid argument.");
-  }
-  return await client.manyOrNone(stmt, [tag, role[0]]); // TODO: in future, union this or something to search with multiple roles at once
+async function searchImagesByTag(client, tag, role) {
+  return await client.manyOrNone(searchImagesStmt, [tag, role[0]]); // TODO: in future, union this or something to search with multiple roles at once
 }
 
 /**

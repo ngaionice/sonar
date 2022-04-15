@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Stack, TextField } from "@mui/material";
+import { Stack, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useUser } from "../contexts/userContext";
 import { useSettings } from "../contexts/settingsContext";
@@ -8,7 +8,6 @@ function SearchModule({ setResults }) {
   const [user, setUser] = useUser();
   const [settings] = useSettings();
   const [searchTerm, setSearchTerm] = useState("");
-  const [mode, setMode] = useState(2);
 
   useEffect(() => {
     let changed = false;
@@ -25,7 +24,6 @@ function SearchModule({ setResults }) {
         },
         params: {
           term: searchTerm,
-          mode,
         },
       });
     };
@@ -45,7 +43,7 @@ function SearchModule({ setResults }) {
       clearTimeout(timerId);
       changed = true;
     };
-  }, [searchTerm, mode, setResults, user, setUser, settings]);
+  }, [searchTerm, setResults, user, setUser, settings]);
 
   const handleTermChange = (e) => {
     setSearchTerm(e.target.value);
@@ -64,35 +62,8 @@ function SearchModule({ setResults }) {
     );
   };
 
-  const ModeButtons = () => {
-    const modes = [
-      { v: 2, l: "Partial" },
-      { v: 1, l: "Insensitive" },
-      { v: 0, l: "Exact" },
-    ];
-
-    return (
-      <ButtonGroup>
-        {modes.map((m) => {
-          return (
-            <Button
-              onClick={() => setMode(m.v)}
-              key={m.v}
-              variant={mode === m.v ? "contained" : "outlined"}
-              disableElevation
-              sx={{ height: "40px" }}
-            >
-              {m.l}
-            </Button>
-          );
-        })}
-      </ButtonGroup>
-    );
-  };
-
   return (
     <Stack direction="row" spacing={2} alignItems="center">
-      <ModeButtons />
       <SearchField />
     </Stack>
   );
