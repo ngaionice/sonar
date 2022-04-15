@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Autocomplete,
   Button,
@@ -19,16 +18,23 @@ import {
 } from "@mui/material";
 import { useUser } from "../contexts/userContext";
 import { useSettings } from "../contexts/settingsContext";
+import getAxiosInstance from "../utilities/axios";
 
 function UserRoleCreator({ setFetchOnChange }) {
-  const [user] = useUser();
+  const [user, setUser] = useUser();
   const [settings] = useSettings();
   const [availableRoles, setAvailableRoles] = useState([]);
 
+  const axios = getAxiosInstance(
+    settings.serverUrl,
+    setUser,
+    user.tokens?.refresh?.token
+  );
+
   useEffect(() => {
     const fetchRoles = async () => {
-      const res = await axios.get(`${settings.serverUrl}/api/users/roles`, {
-        headers: { Authorization: `Bearer ${user.token}` },
+      const res = await axios.get("/users/roles", {
+        headers: { Authorization: `Bearer ${user?.tokens?.access?.token}` },
       });
       const { roles } = res.data;
       return roles;
@@ -46,9 +52,11 @@ function UserRoleCreator({ setFetchOnChange }) {
     const handleSave = () => {
       axios
         .post(
-          `${settings.serverUrl}/api/users/one`,
+          "/users/one",
           { email, name, roles },
-          { headers: { Authorization: `Bearer ${user.token}` } }
+          {
+            headers: { Authorization: `Bearer ${user?.tokens?.access?.token}` },
+          }
         )
         .then(() => {
           setFetchOnChange(new Date());
@@ -123,9 +131,11 @@ function UserRoleCreator({ setFetchOnChange }) {
     const handleSave = () => {
       axios
         .post(
-          `${settings.serverUrl}/api/users/role`,
+          "/users/role",
           { name },
-          { headers: { Authorization: `Bearer ${user.token}` } }
+          {
+            headers: { Authorization: `Bearer ${user?.tokens?.access?.token}` },
+          }
         )
         .then(() => {
           setFetchOnChange(new Date());
@@ -184,14 +194,20 @@ function UserEntry({
   details,
   availableRoles,
   serverUrl,
-  userToken,
   setFetchOnChange,
 }) {
+  const [user, setUser] = useUser();
   const [roles, setRoles] = useState(details.roles || []);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const [currRoles, setCurrRoles] = useState(roles);
   const [currName, setCurrName] = useState(details.name);
+
+  const axios = getAxiosInstance(
+    serverUrl,
+    setUser,
+    user.tokens?.refresh?.token
+  );
 
   const handleDialogClose = () => {
     setDialogOpen(false);
@@ -200,9 +216,9 @@ function UserEntry({
   const handleSave = () => {
     axios
       .put(
-        `${serverUrl}/api/users/one`,
+        "/users/one",
         { email, name: currName, roles: currRoles },
-        { headers: { Authorization: `Bearer ${userToken}` } }
+        { headers: { Authorization: `Bearer ${user?.tokens?.access?.token}` } }
       )
       .then(() => {
         details.name = currName;
@@ -213,8 +229,8 @@ function UserEntry({
 
   const handleDelete = () => {
     axios
-      .delete(`${serverUrl}/api/users/one`, {
-        headers: { Authorization: `Bearer ${userToken}` },
+      .delete("/users/one", {
+        headers: { Authorization: `Bearer ${user?.tokens?.access?.token}` },
         params: { email },
       })
       .then(() => {
@@ -278,26 +294,32 @@ function UserEntry({
 }
 
 function UserManager({ fetchOnChange, setFetchOnChange }) {
-  const [user] = useUser();
+  const [user, setUser] = useUser();
   const [settings] = useSettings();
 
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState({});
   const [roles, setRoles] = useState([]);
 
+  const axios = getAxiosInstance(
+    settings.serverUrl,
+    setUser,
+    user.tokens?.refresh?.token
+  );
+
   useEffect(() => {
     let mounted = true;
     const fetchUsers = async () => {
-      const res = await axios.get(`${settings.serverUrl}/api/users/all`, {
-        headers: { Authorization: `Bearer ${user.token}` },
+      const res = await axios.get("/users/all", {
+        headers: { Authorization: `Bearer ${user?.tokens?.access?.token}` },
       });
       const { users } = res.data;
       return users;
     };
 
     const fetchRoles = async () => {
-      const res = await axios.get(`${settings.serverUrl}/api/users/roles`, {
-        headers: { Authorization: `Bearer ${user.token}` },
+      const res = await axios.get("/users/roles", {
+        headers: { Authorization: `Bearer ${user?.tokens?.access?.token}` },
       });
       const { roles } = res.data;
       return roles;
@@ -336,7 +358,6 @@ function UserManager({ fetchOnChange, setFetchOnChange }) {
           details={v}
           availableRoles={roles}
           serverUrl={settings.serverUrl}
-          userToken={user.token}
           setFetchOnChange={setFetchOnChange}
         />
       ))}

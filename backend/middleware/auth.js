@@ -23,7 +23,7 @@ const verifyToken = (dbClient) =>
           return;
         } else {
           req.user = user;
-          req.user.roles = roles ? roles.map(({ id }) => id) : [];
+          req.user.roles = roles || [];
         }
 
         next();

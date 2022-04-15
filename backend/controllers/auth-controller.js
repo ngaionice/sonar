@@ -79,7 +79,7 @@ const login = (dbClient) =>
       }
 
       const roles = await Individual.getUserRoles(dbClient, email);
-      const tokens = generateTokens(dbClient, email, roles);
+      const tokens = await generateTokens(dbClient, email, roles);
 
       res.status(200).json({
         tokens,
@@ -101,12 +101,12 @@ const refresh = (dbClient) =>
     }
 
     try {
-      const data = jwt.verify(req.token, process.env.JWT_SECRET);
+      const data = jwt.verify(token, process.env.JWT_SECRET);
       const { email, roles } = data;
       const isRevoked = await dbClient.tx(async (t) => {
         const isRevoked = await Auth.isTokenRevoked(t, token);
         if (isRevoked) {
-          await Auth.revokeUserSubsequentTokens(t, token);
+          await Auth.revokeUserSubsequentTokens(t, token, email);
           return false;
         }
         await Auth.revokeToken(t, token);
@@ -118,7 +118,7 @@ const refresh = (dbClient) =>
         return;
       }
 
-      const tokens = generateTokens(dbClient, email, roles);
+      const tokens = await generateTokens(dbClient, email, roles);
 
       res.status(200).json({
         tokens,

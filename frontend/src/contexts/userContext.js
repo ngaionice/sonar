@@ -1,25 +1,68 @@
 import { createContext, useContext, useMemo, useReducer } from "react";
 
 function sessionReducer(state, action) {
+  if (action.type === "logout") {
+    action.payload = {};
+  }
+  if (!action.payload) {
+    throw new Error("No action.payload passed to sessionReducer.");
+  }
+  const { tokens, name, imageUrl, isAdmin } = action.payload;
   switch (action.type) {
-    case "signIn":
-      const { token, name, imageUrl, isAdmin } = action.payload;
-      if (!token) {
-        throw new Error("No token provided when signing in.");
+    case "login":
+      if (!tokens) {
+        throw new Error("No tokens provided when signing in.");
       }
-      return { isSignedIn: true, token, name, imageUrl, isAdmin };
-    case "signOut":
+      localStorage.setItem("tokens", JSON.stringify(tokens));
+      localStorage.setItem("user", JSON.stringify({ name, imageUrl, isAdmin }));
+      return { isSignedIn: true, tokens, name, imageUrl, isAdmin };
+    case "logout":
+      localStorage.removeItem("tokens");
+      localStorage.removeItem("user");
       return { isSignedIn: false };
+    case "refresh":
+      localStorage.setItem("tokens", JSON.stringify(tokens));
+      return {
+        ...state,
+        isSignedIn: true,
+        tokens,
+      };
     default:
-      throw new Error("Illegal action.type passed to sessionReducer.");
+      throw new Error(
+        `Illegal action.type passed to sessionReducer: ${action.type}.`
+      );
   }
 }
 
-function initSession(initialArg) {
-  // read from cookies eventually to get signed in state
+function areTokensValid(tokens) {
+  if (
+    !tokens?.access?.token ||
+    !tokens?.access?.expiry ||
+    !tokens?.refresh?.token ||
+    !tokens?.refresh?.expiry
+  ) {
+    return false;
+  }
+  const minLivingTime = Math.floor(Date.now() / 1000) + 60 * 60;
+  return (
+    tokens.access.expiry >= minLivingTime ||
+    tokens.refresh.expiry >= minLivingTime + 29 * 60 * 60
+  );
+}
+
+function initSession({ tokens, user }) {
+  if (!tokens || !areTokensValid(tokens)) {
+    return {
+      isSignedIn: false,
+    };
+  }
+  const { name, isAdmin, imageUrl } = user;
   return {
-    isSignedIn: initialArg,
-    token: null,
+    isSignedIn: true,
+    tokens,
+    name,
+    isAdmin,
+    imageUrl,
   };
 }
 
@@ -36,7 +79,10 @@ function useUser() {
 function UserProvider(props) {
   const [user, dispatchUser] = useReducer(
     sessionReducer,
-    false, // make it meaningful later for initSession
+    {
+      tokens: JSON.parse(localStorage.getItem("tokens")),
+      user: JSON.parse(localStorage.getItem("user")),
+    },
     initSession
   );
   const value = useMemo(() => [user, dispatchUser], [user]);

@@ -28,11 +28,12 @@ const getUserActiveTokenCountStmt =
  * @type {string}
  */
 const deleteUserOldestActiveTokenStmt =
-  "delete from RefreshToken where email = $1 and created <= (select created from RefreshToken where email = $1 and revoked = false order by created limit 1)";
+  "delete from RefreshToken where email = $1 and createdAt <= (select createdAt from RefreshToken where email = $1 and revoked = false order by createdAt limit 1)";
 
 /**
  * Params:
- * 1. token
+ * 1. email
+ * 2. token
  * @type {string}
  */
 const revokeUserSubsequentTokensStmt =

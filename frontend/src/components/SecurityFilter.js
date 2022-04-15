@@ -6,7 +6,7 @@ function SecurityFilter({ children, adminOnly }) {
   let [user] = useUser();
   let location = useLocation();
 
-  if (!user.token) {
+  if (!user.tokens?.access?.token) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
   if (adminOnly && !user.isAdmin) {

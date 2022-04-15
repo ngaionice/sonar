@@ -9,7 +9,6 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import axios from "axios";
 
 import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -17,9 +16,10 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { useUser } from "../contexts/userContext";
 import { Masonry } from "@mui/lab";
 import { useSettings } from "../contexts/settingsContext";
+import getAxiosInstance from "../utilities/axios";
 
 function ImageDisplay({ images }) {
-  const [user] = useUser();
+  const [user, setUser] = useUser();
   const [settings] = useSettings();
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -96,10 +96,16 @@ function ImageDisplay({ images }) {
     const id = displayed.id;
 
     const handleClick = () => {
+      const axios = getAxiosInstance(
+        settings.serverUrl,
+        setUser,
+        user.tokens?.refresh?.token
+      );
+
       axios
         .delete(`${settings.serverUrl}/api/files/delete`, {
           headers: {
-            Authorization: `Bearer ${user.token}`,
+            Authorization: `Bearer ${user?.tokens?.access?.token}`,
           },
           params: {
             keys: JSON.stringify([id]),

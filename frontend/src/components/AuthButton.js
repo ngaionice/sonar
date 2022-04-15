@@ -28,11 +28,11 @@ const login = async (auth, provider, dispatchSession, serverUrl) => {
   const serverLoginResult = await axios.post(`${serverUrl}/api/auth/login`, {
     token: credential.idToken,
   });
-  const { token, name, isAdmin } = serverLoginResult.data;
+  const { tokens, name, isAdmin } = serverLoginResult.data;
   dispatchSession({
-    type: "signIn",
+    type: "login",
     payload: {
-      token,
+      tokens,
       name,
       imageUrl,
       isAdmin,
@@ -44,10 +44,7 @@ const logout = (auth, dispatchSession) => {
   signOut(auth)
     .then((_) => {
       dispatchSession({
-        type: "signOut",
-        payload: {
-          isSignedIn: false,
-        },
+        type: "logout",
       });
     })
     .catch((err) => console.log(err));

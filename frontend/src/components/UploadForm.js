@@ -14,7 +14,6 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useUser } from "../contexts/userContext";
 
@@ -25,9 +24,10 @@ import LinkIcon from "@mui/icons-material/Link";
 import StyleIcon from "@mui/icons-material/Style";
 import { LoadingButton } from "@mui/lab";
 import { useSettings } from "../contexts/settingsContext";
+import getAxiosInstance from "../utilities/axios";
 
 function UploadForm() {
-  const [user] = useUser();
+  const [user, setUser] = useUser();
   const [settings] = useSettings();
   const [selected, setSelected] = useState({});
   const [isPublic, setIsPublic] = useState(false);
@@ -35,6 +35,12 @@ function UploadForm() {
   const [tags, setTags] = useState([]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  const axios = getAxiosInstance(
+    settings.serverUrl,
+    setUser,
+    user.tokens?.refresh?.token
+  );
 
   const uploadHotkeyListener = (e) => {
     if ((e.metaKey || e.ctrlKey) && e.code === "KeyA") {
@@ -298,12 +304,12 @@ function UploadForm() {
 
       const config = {
         headers: {
-          Authorization: `Bearer ${user.token}`,
+          Authorization: `Bearer ${user?.tokens?.access?.token}`,
         },
       };
 
       axios
-        .post(`${settings.serverUrl}/api/files/upload`, formData, config)
+        .post(`/files/upload`, formData, config)
         .catch((e) => {
           // TODO: some error handling?
           console.log(e);

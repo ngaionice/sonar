@@ -29,8 +29,8 @@ async function revokeToken(client, token) {
   await client.none(Auth.revokeTokenStmt, [token]);
 }
 
-async function revokeUserSubsequentTokens(client, token) {
-  await client.none(Auth.revokeUserSubsequentTokensStmt, [token]);
+async function revokeUserSubsequentTokens(client, token, email) {
+  await client.none(Auth.revokeUserSubsequentTokensStmt, [email, token]);
 }
 
 async function insertToken(client, token, email) {

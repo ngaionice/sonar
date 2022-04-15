@@ -25,7 +25,8 @@ async function findByEmail(client, email) {
 }
 
 async function getUserRoles(client, email) {
-  return await client.manyOrNone(getUserRolesStmt, [email]);
+  const raw = await client.manyOrNone(getUserRolesStmt, [email]);
+  return raw.map((v) => v.id);
 }
 
 /**
