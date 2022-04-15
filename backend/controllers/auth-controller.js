@@ -55,7 +55,7 @@ const generateTokens = async (dbClient, email, roles) => {
   await dbClient.tx(async (t) => {
     const activeTokens = await Auth.getUserActiveTokenCount(t, email);
     if (activeTokens >= 10) {
-      await Auth.deleteUserOldestActiveToken(t, email);
+      await Auth.revokeUserOldestActiveToken(t, email);
     }
     await Auth.insertToken(t, tokens.refresh.token, email);
   });

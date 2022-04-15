@@ -1,7 +1,7 @@
 import * as Auth from "./statements/auth-statements.js";
 
-async function deleteUserOldestActiveToken(client, email) {
-  await client.none(Auth.deleteUserOldestActiveTokenStmt, [email]);
+async function revokeUserOldestActiveToken(client, email) {
+  await client.none(Auth.revokeUserOldestActiveTokenStmt, [email]);
 }
 
 /**
@@ -38,7 +38,7 @@ async function insertToken(client, token, email) {
 }
 
 export {
-  deleteUserOldestActiveToken,
+  revokeUserOldestActiveToken,
   getUserActiveTokenCount,
   isTokenRevoked,
   revokeToken,

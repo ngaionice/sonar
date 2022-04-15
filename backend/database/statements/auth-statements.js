@@ -27,8 +27,8 @@ const getUserActiveTokenCountStmt =
  * 1. email
  * @type {string}
  */
-const deleteUserOldestActiveTokenStmt =
-  "delete from RefreshToken where email = $1 and createdAt <= (select createdAt from RefreshToken where email = $1 and revoked = false order by createdAt limit 1)";
+const revokeUserOldestActiveTokenStmt =
+  "update RefreshToken set revoked = true where email = $1 and createdAt <= (select createdAt from RefreshToken where email = $1 and revoked = false order by createdAt limit 1)";
 
 /**
  * Params:
@@ -49,7 +49,7 @@ const insertTokenStmt =
   "insert into RefreshToken (token, email) values ($2, $1)";
 
 export {
-  deleteUserOldestActiveTokenStmt,
+  revokeUserOldestActiveTokenStmt,
   getUserActiveTokenCountStmt,
   isTokenRevokedStmt,
   revokeTokenStmt,
