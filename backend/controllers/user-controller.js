@@ -30,7 +30,7 @@ const getUser = (dbClient) =>
       res.sendStatus(401);
       return;
     }
-    const user = await Individual.getUser(dbClient, email);
+    const user = await Individual.getUserWithRoles(dbClient, email);
     res.status(200).json({ user });
   });
 

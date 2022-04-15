@@ -7,7 +7,8 @@ use trie;
 
 create table Individual (
     email string primary key,
-    name string not null
+    name string not null,
+    salt string not null
 );
 
 create table Role (

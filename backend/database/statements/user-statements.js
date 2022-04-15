@@ -25,8 +25,10 @@ const insertRoleStmt = "insert into Role (title, id) values ($1, $2)";
  * Params:
  * 1. email
  * 2. name
+ * 3. salt
  */
-const insertUserStmt = "insert into Individual (email, name) values ($1, $2)";
+const insertUserStmt =
+  "insert into Individual (email, name, salt) values ($1, $2, $3)";
 
 /**
  * Params:

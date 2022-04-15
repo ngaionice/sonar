@@ -11,16 +11,18 @@ import {
   insertUserStmt,
   updateUserNameStmt,
 } from "./statements/user-statements.js";
+import { randomBytes } from "crypto";
 
 /**
  * Returns an object containing the user's:
  * - `name`: name of the user
  * - `email`: email of the user
+ * - `salt`: salt used to encrypt user's refresh tokens in DB
  * @param client
  * @param email
  * @return {Promise<any>}
  */
-async function findByEmail(client, email) {
+async function getUserWithoutRoles(client, email) {
   return await client.oneOrNone(findByEmailStmt, [email]);
 }
 
@@ -73,7 +75,7 @@ async function getAllUsers(client) {
  * @param email
  * @return {Promise<{}>}
  */
-async function getUser(client, email) {
+async function getUserWithRoles(client, email) {
   const raw = await client.manyOrNone(getUserStmt, [email]);
   const user = {};
   raw.forEach((row) => {
@@ -98,7 +100,9 @@ async function getUser(client, email) {
  */
 async function insertUser(client, email, name, roles) {
   await client.tx("insert-user", async (t) => {
-    await t.none(insertUserStmt, [email, name]);
+    const salt = randomBytes(64).toString("hex");
+    await t.none(insertUserStmt, [email, name, salt]);
+    // TODO: use multi-insert to not hammer the database IO with writes
     for (const r of roles) {
       await t.none(insertUserRoleStmt, [email, r]);
     }
@@ -141,8 +145,8 @@ export {
   getAllRoles,
   getAllUsers,
   getUserRoles,
-  getUser,
-  findByEmail,
+  getUserWithRoles,
+  getUserWithoutRoles,
   insertRole,
   insertUser,
   updateUser,

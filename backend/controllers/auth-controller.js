@@ -12,6 +12,7 @@ import {
 } from "../utils/generate-token.js";
 import { isAdmin } from "./controller-helpers.js";
 import jwt from "jsonwebtoken";
+import { pbkdf2Sync } from "crypto";
 
 // Takes in an ID token from Google OAuth, and verifies it. If valid, returns the token payload, else throws an error.
 const verifyUser = async (token) => {
@@ -36,7 +37,10 @@ const verifyUser = async (token) => {
   }
 };
 
-const generateTokens = async (dbClient, email, roles) => {
+const hashToken = (token, salt) =>
+  pbkdf2Sync(token, salt, 100000, 64, "sha512").toString("hex");
+
+const generateTokens = async (dbClient, email, roles, salt) => {
   const time = Math.floor(Date.now() / 1000);
   const accessExp = time + Number(process.env.ACCESS_TOKEN_EXPIRY_SECONDS);
   const refreshExp = time + Number(process.env.REFRESH_TOKEN_EXPIRY_SECONDS);
@@ -47,17 +51,19 @@ const generateTokens = async (dbClient, email, roles) => {
       expiry: accessExp,
     },
     refresh: {
-      token: generateRefreshToken({ email, exp: refreshExp, roles }),
+      token: generateRefreshToken({ email, exp: refreshExp, roles, salt }),
       expiry: refreshExp,
     },
   };
+
+  const refreshTokenHash = hashToken(tokens.refresh.token, salt);
 
   await dbClient.tx(async (t) => {
     const activeTokens = await Auth.getUserActiveTokenCount(t, email);
     if (activeTokens >= 10) {
       await Auth.revokeUserOldestActiveToken(t, email);
     }
-    await Auth.insertToken(t, tokens.refresh.token, email);
+    await Auth.insertToken(t, refreshTokenHash, email);
   });
 
   return tokens;
@@ -71,7 +77,7 @@ const login = (dbClient) =>
       const authPayload = await verifyUser(token);
       const { email } = authPayload;
 
-      const user = await Individual.findByEmail(dbClient, email);
+      const user = await Individual.getUserWithoutRoles(dbClient, email);
 
       if (!user) {
         res.status(404).send("User not found");
@@ -79,7 +85,7 @@ const login = (dbClient) =>
       }
 
       const roles = await Individual.getUserRoles(dbClient, email);
-      const tokens = await generateTokens(dbClient, email, roles);
+      const tokens = await generateTokens(dbClient, email, roles, user.salt);
 
       res.status(200).json({
         tokens,
@@ -102,14 +108,15 @@ const refresh = (dbClient) =>
 
     try {
       const data = jwt.verify(token, process.env.JWT_SECRET);
-      const { email, roles } = data;
+      const { email, roles, salt } = data;
       const isRevoked = await dbClient.tx(async (t) => {
-        const isRevoked = await Auth.isTokenRevoked(t, token);
+        const tokenHash = hashToken(token, salt);
+        const isRevoked = await Auth.isTokenRevoked(t, tokenHash);
         if (isRevoked) {
-          await Auth.revokeUserSubsequentTokens(t, token, email);
+          await Auth.revokeUserSubsequentTokens(t, tokenHash, email);
           return false;
         }
-        await Auth.revokeToken(t, token);
+        await Auth.revokeToken(t, tokenHash);
         return true;
       });
 
@@ -118,7 +125,7 @@ const refresh = (dbClient) =>
         return;
       }
 
-      const tokens = await generateTokens(dbClient, email, roles);
+      const tokens = await generateTokens(dbClient, email, roles, salt);
 
       res.status(200).json({
         tokens,
