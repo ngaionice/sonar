@@ -2,14 +2,11 @@ import { initializeApp } from "firebase/app";
 import { useRef, useState } from "react";
 
 import { UserProvider } from "./contexts/userContext";
-import AuthButton from "./components/AuthButton";
-import { Route, Routes, useLocation } from "react-router-dom";
-import UploadForm from "./components/UploadForm";
+import { Route, Routes } from "react-router-dom";
 import AppBar from "./components/AppBar";
 import {
   Box,
   CssBaseline,
-  Stack,
   StyledEngineProvider,
   ThemeProvider,
 } from "@mui/material";
@@ -17,10 +14,9 @@ import getTheme from "./theme";
 import LoginPage from "./pages/LoginPage";
 import SecurityFilter from "./components/SecurityFilter";
 import SearchPage from "./pages/SearchPage";
-import SettingsModule from "./components/SettingsModule";
 import { SettingsProvider, useSettings } from "./contexts/settingsContext";
-import ThemeModule from "./components/ThemeModule";
 import ManageUsersPage from "./pages/ManageUsersPage";
+import ToolbarMenu from "./components/ToolbarMenu";
 
 function initializeFirebase() {
   const firebaseConfig = {
@@ -54,7 +50,6 @@ function App() {
   }
 
   const [data, setData] = useState([]);
-  let location = useLocation();
 
   return (
     <UserProvider>
@@ -63,14 +58,7 @@ function App() {
           <CssBaseline />
           <AppBar>
             <Box sx={{ flexGrow: 1 }} />
-            <Stack spacing={1} direction="row">
-              <UploadForm />
-              <ThemeModule />
-              <SettingsModule />
-              {location.pathname === "/" ? null : (
-                <AuthButton setLoading={() => {}} useIcon />
-              )}
-            </Stack>
+            <ToolbarMenu />
           </AppBar>
           <Routes>
             <Route path="/" element={<LoginPage />} />
