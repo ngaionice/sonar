@@ -1,7 +1,6 @@
 import {
   Button,
   Checkbox,
-  Chip,
   Container,
   Dialog,
   DialogActions,
@@ -21,10 +20,10 @@ import AddIcon from "@mui/icons-material/Add";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CodeIcon from "@mui/icons-material/Code";
 import LinkIcon from "@mui/icons-material/Link";
-import StyleIcon from "@mui/icons-material/Style";
 import { LoadingButton } from "@mui/lab";
 import { useSettings } from "../contexts/settingsContext";
 import getAxiosInstance from "../utilities/axios";
+import TagEditor from "./TagEditor";
 
 function UploadForm() {
   const [user, setUser] = useUser();
@@ -236,45 +235,6 @@ function UploadForm() {
     );
   };
 
-  const Tagger = () => {
-    const handleTagInsert = (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        if (!tags.includes(e.target.value)) {
-          setTags([...tags, e.target.value]);
-        }
-      }
-    };
-
-    const handleTagDelete = (index) => {
-      setTags(tags.filter((_, i) => i !== index));
-    };
-
-    return (
-      <Stack spacing={1}>
-        <TextField
-          size="small"
-          label="Tags"
-          autoFocus
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <StyleIcon />
-              </InputAdornment>
-            ),
-          }}
-          onKeyDown={handleTagInsert}
-          disabled={!selected}
-        />
-        <Stack direction="row" spacing={1}>
-          {tags.map((t, i) => (
-            <Chip label={t} key={t} onDelete={() => handleTagDelete(i)} />
-          ))}
-        </Stack>
-      </Stack>
-    );
-  };
-
   const UploadButton = () => {
     const [loading, setLoading] = useState(false);
 
@@ -343,7 +303,7 @@ function UploadForm() {
         <Stack spacing={2}>
           <UploadOptions />
           <PreviewPanel />
-          <Tagger />
+          <TagEditor tags={tags} setTags={setTags} />
           <PublicCheckbox />
         </Stack>
       </Container>
