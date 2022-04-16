@@ -19,6 +19,7 @@ import {
 import { useUser } from "../contexts/userContext";
 import { useSettings } from "../contexts/settingsContext";
 import getAxiosInstance from "../utilities/axios";
+import RoleEditor from "./RoleEditor";
 
 function UserRoleCreator({ setFetchOnChange }) {
   const [user, setUser] = useUser();
@@ -236,6 +237,7 @@ function UserEntry({
 
   const DialogContents = () => {
     const handleNameChange = (e) => {
+      e.preventDefault();
       setCurrName(e.target.value);
     };
 
@@ -248,14 +250,10 @@ function UserEntry({
             label="Name"
             autoFocus // TODO: figure out what makes it lose focus every time
           />
-          <Autocomplete
-            multiple
-            options={availableRoles}
-            getOptionLabel={(option) => option}
-            filterSelectedOptions
-            renderInput={(params) => <TextField {...params} label="Roles" />}
-            value={currRoles}
-            onChange={(e, nv) => setCurrRoles(nv)}
+          <RoleEditor
+            roleOptions={availableRoles}
+            roles={currRoles}
+            setRoles={setCurrRoles}
           />
         </Stack>
       </Container>

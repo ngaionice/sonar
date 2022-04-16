@@ -21,7 +21,6 @@ function getAxiosInstance(baseUrl, setUser, refreshToken, refreshTokenCall) {
       if (err.response && err.response.status === 401 && !config._refreshed) {
         config._refreshed = true;
         try {
-          console.log("running retry");
           refreshTokenCall.current =
             refreshTokenCall.current ?? refreshTokens(baseUrl, refreshToken);
           const { data } = await refreshTokenCall.current;
@@ -30,6 +29,7 @@ function getAxiosInstance(baseUrl, setUser, refreshToken, refreshTokenCall) {
           config.headers.Authorization = `Bearer ${data.tokens.access.token}`;
           return instance(config);
         } catch (e) {
+          refreshTokenCall.current = null;
           return Promise.reject(e);
         }
       }

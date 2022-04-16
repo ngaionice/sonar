@@ -42,16 +42,12 @@ const insertRole = (dbClient) =>
     }
     const { name } = req.body;
     const currRoles = await Individual.getAllRoles(dbClient);
-    const maxPrime = currRoles[0].id;
-    const nextPrime = getNextPrime(maxPrime);
-    if (nextPrime > 2147483647) {
-      res
-        .status(500)
-        .message(
-          "You have somehow managed to make over 105 million roles. Perhaps consider another solution."
-        );
+    if (currRoles.length > 200) {
+      res.status(500).message("Only 200 roles are allowed at a time.");
       return;
     }
+    const nextPrime = getNextPrime(new Set(currRoles.map((role) => role.id)));
+
     await Individual.insertRole(dbClient, name, nextPrime);
     res.sendStatus(201);
   });
