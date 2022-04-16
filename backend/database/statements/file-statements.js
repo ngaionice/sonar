@@ -5,7 +5,7 @@
  * 3. useCache
  */
 const insertImageStmt =
-  "insert into Image (id, mainUrl, useCache, readRoles) values ($1, $2, $3, $4)";
+  "insert into Image (id, mainUrl, useCache, readRoles, createdAt) values ($1, $2, $3, $4, current_timestamp)";
 
 /**
  * Params:

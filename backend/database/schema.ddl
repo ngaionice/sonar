@@ -26,7 +26,8 @@ create table Image (
     id string primary key, -- the key (i.e. file name) on S3 bucket
     mainUrl string not null, -- the URL to access the resource on S3
     useCache boolean not null default false, -- whether this file should be on imgur
-    readRoles int not null default 1
+    readRoles int not null default 1,
+    createdAt timestamptz not null default current_timestamp
 );
 
 create table ImageCache (
