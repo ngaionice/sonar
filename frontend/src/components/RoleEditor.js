@@ -105,7 +105,7 @@ function RoleSelector({ roles, setRoles, reload, setReload }) {
   const refreshTokenCall = useRef(null);
 
   const [roleOptions, setRoleOptions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -153,6 +153,7 @@ function RoleSelector({ roles, setRoles, reload, setReload }) {
       options={roleOptions}
       getOptionLabel={extractOption}
       filterSelectedOptions
+      fullWidth
       renderInput={(params) => <TextField {...params} label="Roles" />}
       value={roles}
       onChange={(e, nv) => setRoles(nv)}
@@ -181,7 +182,7 @@ function RoleEditor({ roles, setRoles }) {
   );
 
   return (
-    <Stack spacing={1} direction="row" alignItems="center">
+    <Stack spacing={2} direction="row" alignItems="center" flexGrow={1}>
       <RoleSelector
         roles={roles}
         setRoles={setRoles}

@@ -36,7 +36,7 @@ function SettingsModule() {
   const DialogContent = () => {
     return (
       <Container maxWidth="md" sx={{ paddingY: 3 }}>
-        <Stack spacing={2}>
+        <Stack spacing={2} flexGrow={1}>
           <TextField
             label="Server address"
             size="small"
@@ -57,11 +57,13 @@ function SettingsModule() {
           <SettingsIcon />
         </IconButton>
       </Tooltip>
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog open={open} onClose={handleClose} fullWidth>
         <DialogTitle>Settings</DialogTitle>
         <DialogContent />
         <DialogActions>
-          <Button onClick={handleSave}>Save</Button>
+          <Button onClick={handleSave} variant="contained">
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
     </>

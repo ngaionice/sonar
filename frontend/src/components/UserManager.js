@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Autocomplete,
   Button,
   Chip,
   CircularProgress,
@@ -21,10 +20,9 @@ import { useSettings } from "../contexts/settingsContext";
 import getAxiosInstance from "../utilities/axios";
 import RoleEditor from "./RoleEditor";
 
-function UserRoleCreator({ setFetchOnChange }) {
+function UserCreator({ setFetchOnChange }) {
   const [user, setUser] = useUser();
   const [settings] = useSettings();
-  const [availableRoles, setAvailableRoles] = useState([]);
   const refreshTokenCall = useRef(null);
 
   const axios = getAxiosInstance(
@@ -33,18 +31,6 @@ function UserRoleCreator({ setFetchOnChange }) {
     user.tokens?.refresh?.token,
     refreshTokenCall
   );
-
-  useEffect(() => {
-    const fetchRoles = async () => {
-      const res = await axios.get("/users/roles", {
-        headers: { Authorization: `Bearer ${user?.tokens?.access?.token}` },
-      });
-      const { roles } = res.data;
-      return roles;
-    };
-
-    fetchRoles().then((roles) => setAvailableRoles(roles));
-  }, [settings, user]);
 
   const AddUserButton = () => {
     const [open, setOpen] = useState(false);
@@ -88,8 +74,10 @@ function UserRoleCreator({ setFetchOnChange }) {
 
     return (
       <>
-        <Button onClick={handleOpen}>Add User</Button>
-        <Dialog open={open} onClose={handleClose}>
+        <Button onClick={handleOpen} fullWidth variant="outlined">
+          Add User
+        </Button>
+        <Dialog open={open} onClose={handleClose} fullWidth>
           <DialogTitle>Add User</DialogTitle>
           <DialogContent>
             <Container maxWidth="md" sx={{ paddingY: 3 }}>
@@ -98,86 +86,23 @@ function UserRoleCreator({ setFetchOnChange }) {
                   label="Email"
                   value={email}
                   onChange={handleEmailChange}
+                  fullWidth
                 />
                 <TextField
                   label="Name"
                   value={name}
                   onChange={handleNameChange}
+                  fullWidth
                 />
-                <Autocomplete
-                  multiple
-                  options={availableRoles}
-                  getOptionLabel={(option) => option}
-                  filterSelectedOptions
-                  renderInput={(params) => (
-                    <TextField {...params} label="Roles" />
-                  )}
-                  value={roles}
-                  onChange={(e, nv) => setRoles(nv)}
-                />
+                <RoleEditor roles={roles} setRoles={setRoles} />
               </Stack>
             </Container>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Close</Button>
-            <Button onClick={handleSave}>Save</Button>
-          </DialogActions>
-        </Dialog>
-      </>
-    );
-  };
-
-  const AddRoleButton = () => {
-    const [open, setOpen] = useState(false);
-    const [name, setName] = useState("");
-
-    const handleSave = () => {
-      axios
-        .post(
-          "/users/role",
-          { name },
-          {
-            headers: { Authorization: `Bearer ${user?.tokens?.access?.token}` },
-          }
-        )
-        .then(() => {
-          setFetchOnChange(new Date());
-          handleClose();
-        });
-    };
-
-    const handleOpen = () => {
-      setOpen(true);
-    };
-
-    const handleClose = () => {
-      setOpen(false);
-      setName("");
-    };
-
-    const handleNameChange = (e) => {
-      setName(e.target.value);
-    };
-
-    return (
-      <>
-        <Button onClick={handleOpen}>Add Role</Button>
-        <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>Add Role</DialogTitle>
-          <DialogContent>
-            <Container maxWidth="md" sx={{ paddingY: 3 }}>
-              <Stack spacing={2}>
-                <TextField
-                  label="Name"
-                  value={name}
-                  onChange={handleNameChange}
-                />
-              </Stack>
-            </Container>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Close</Button>
-            <Button onClick={handleSave}>Save</Button>
+            <Button onClick={handleSave} variant="contained">
+              Save
+            </Button>
           </DialogActions>
         </Dialog>
       </>
@@ -185,20 +110,13 @@ function UserRoleCreator({ setFetchOnChange }) {
   };
 
   return (
-    <Stack spacing={4} direction="row">
+    <Stack direction="row">
       <AddUserButton />
-      <AddRoleButton />
     </Stack>
   );
 }
 
-function UserEntry({
-  email,
-  details,
-  availableRoles,
-  axios,
-  setFetchOnChange,
-}) {
+function UserEntry({ email, details, axios, setFetchOnChange }) {
   const [user] = useUser();
   const [roles, setRoles] = useState(details.roles || []);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -249,12 +167,9 @@ function UserEntry({
             onChange={handleNameChange}
             label="Name"
             autoFocus // TODO: figure out what makes it lose focus every time
+            fullWidth
           />
-          <RoleEditor
-            roleOptions={availableRoles}
-            roles={currRoles}
-            setRoles={setCurrRoles}
-          />
+          <RoleEditor roles={currRoles} setRoles={setCurrRoles} />
         </Stack>
       </Container>
     );
@@ -270,7 +185,7 @@ function UserEntry({
           ))}
         </Stack>
       </ListItemButton>
-      <Dialog open={dialogOpen} onClose={handleDialogClose}>
+      <Dialog open={dialogOpen} onClose={handleDialogClose} fullWidth>
         <DialogTitle>Edit user</DialogTitle>
         <DialogContent>
           <DialogContents />
@@ -280,7 +195,9 @@ function UserEntry({
             Delete
           </Button>
           <Button onClick={handleDialogClose}>Close</Button>
-          <Button onClick={handleSave}>Save</Button>
+          <Button onClick={handleSave} variant="contained">
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
     </ListItem>
@@ -293,14 +210,17 @@ function UserManager({ fetchOnChange, setFetchOnChange }) {
 
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState({});
-  const [roles, setRoles] = useState([]);
   const refreshTokenCall = useRef(null);
 
-  const axios = getAxiosInstance(
-    settings.serverUrl,
-    setUser,
-    user.tokens?.refresh?.token,
-    refreshTokenCall
+  const axios = useMemo(
+    () =>
+      getAxiosInstance(
+        settings.serverUrl,
+        setUser,
+        user.tokens?.refresh?.token,
+        refreshTokenCall
+      ),
+    [settings, user, setUser]
   );
 
   useEffect(() => {
@@ -313,33 +233,18 @@ function UserManager({ fetchOnChange, setFetchOnChange }) {
       return users;
     };
 
-    const fetchRoles = async () => {
-      const res = await axios.get("/users/roles", {
-        headers: { Authorization: `Bearer ${user?.tokens?.access?.token}` },
-      });
-      const { roles } = res.data;
-      return roles;
-    };
-
     setLoading(true);
-    fetchUsers()
-      .then((users) => {
-        if (mounted) {
-          setUsers(users);
-        }
-      })
-      .then(() => fetchRoles())
-      .then((roles) => {
-        if (mounted) {
-          setRoles(roles);
-          setLoading(false);
-        }
-      });
+    fetchUsers().then((users) => {
+      if (mounted) {
+        setUsers(users);
+        setLoading(false);
+      }
+    });
 
     return () => {
       mounted = false;
     };
-  }, [setUsers, settings, user, fetchOnChange]);
+  }, [setUsers, settings, user, fetchOnChange, axios]);
 
   if (loading) {
     return <CircularProgress />;
@@ -352,7 +257,6 @@ function UserManager({ fetchOnChange, setFetchOnChange }) {
           key={k}
           email={k}
           details={v}
-          availableRoles={roles}
           axios={axios}
           setFetchOnChange={setFetchOnChange}
         />
@@ -361,4 +265,4 @@ function UserManager({ fetchOnChange, setFetchOnChange }) {
   );
 }
 
-export { UserManager, UserRoleCreator };
+export { UserManager, UserCreator };
