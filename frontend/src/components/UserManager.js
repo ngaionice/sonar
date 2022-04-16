@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Autocomplete,
   Button,
@@ -24,11 +24,13 @@ function UserRoleCreator({ setFetchOnChange }) {
   const [user, setUser] = useUser();
   const [settings] = useSettings();
   const [availableRoles, setAvailableRoles] = useState([]);
+  const refreshTokenCall = useRef(null);
 
   const axios = getAxiosInstance(
     settings.serverUrl,
     setUser,
-    user.tokens?.refresh?.token
+    user.tokens?.refresh?.token,
+    refreshTokenCall
   );
 
   useEffect(() => {
@@ -193,21 +195,15 @@ function UserEntry({
   email,
   details,
   availableRoles,
-  serverUrl,
+  axios,
   setFetchOnChange,
 }) {
-  const [user, setUser] = useUser();
+  const [user] = useUser();
   const [roles, setRoles] = useState(details.roles || []);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const [currRoles, setCurrRoles] = useState(roles);
   const [currName, setCurrName] = useState(details.name);
-
-  const axios = getAxiosInstance(
-    serverUrl,
-    setUser,
-    user.tokens?.refresh?.token
-  );
 
   const handleDialogClose = () => {
     setDialogOpen(false);
@@ -300,11 +296,13 @@ function UserManager({ fetchOnChange, setFetchOnChange }) {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState({});
   const [roles, setRoles] = useState([]);
+  const refreshTokenCall = useRef(null);
 
   const axios = getAxiosInstance(
     settings.serverUrl,
     setUser,
-    user.tokens?.refresh?.token
+    user.tokens?.refresh?.token,
+    refreshTokenCall
   );
 
   useEffect(() => {
@@ -357,7 +355,7 @@ function UserManager({ fetchOnChange, setFetchOnChange }) {
           email={k}
           details={v}
           availableRoles={roles}
-          serverUrl={settings.serverUrl}
+          axios={axios}
           setFetchOnChange={setFetchOnChange}
         />
       ))}

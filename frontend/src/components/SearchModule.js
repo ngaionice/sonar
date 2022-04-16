@@ -1,5 +1,5 @@
 import { Stack, TextField } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useUser } from "../contexts/userContext";
 import { useSettings } from "../contexts/settingsContext";
 import getAxiosInstance from "../utilities/axios";
@@ -8,6 +8,7 @@ function SearchModule({ setResults }) {
   const [user, setUser] = useUser();
   const [settings] = useSettings();
   const [searchTerm, setSearchTerm] = useState("");
+  const refreshTokenCall = useRef(null);
 
   useEffect(() => {
     let changed = false;
@@ -16,7 +17,8 @@ function SearchModule({ setResults }) {
       const axios = getAxiosInstance(
         settings.serverUrl,
         setUser,
-        user.tokens?.refresh?.token
+        user.tokens?.refresh?.token,
+        refreshTokenCall
       );
       return await axios.get("/files/search", {
         headers: {

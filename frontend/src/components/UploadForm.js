@@ -14,7 +14,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useUser } from "../contexts/userContext";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -33,13 +33,15 @@ function UploadForm() {
   const [isPublic, setIsPublic] = useState(false);
   const [uploadMode, setUploadMode] = useState(0);
   const [tags, setTags] = useState([]);
+  const refreshTokenCall = useRef(null);
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const axios = getAxiosInstance(
     settings.serverUrl,
     setUser,
-    user.tokens?.refresh?.token
+    user.tokens?.refresh?.token,
+    refreshTokenCall
   );
 
   const uploadHotkeyListener = (e) => {

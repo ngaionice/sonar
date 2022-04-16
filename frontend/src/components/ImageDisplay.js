@@ -8,7 +8,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -21,10 +21,18 @@ import getAxiosInstance from "../utilities/axios";
 function ImageDisplay({ images }) {
   const [user, setUser] = useUser();
   const [settings] = useSettings();
+  const refreshTokenCall = useRef(null);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [displayed, setDisplayed] = useState(null);
   const [displayIcon, setDisplayIcon] = useState(<ContentCopyIcon />);
+
+  const axios = getAxiosInstance(
+    settings.serverUrl,
+    setUser,
+    user.tokens?.refresh?.token,
+    refreshTokenCall
+  );
 
   const ListEntry = ({ image }) => {
     const { id: title, url: img } = image;
@@ -96,12 +104,6 @@ function ImageDisplay({ images }) {
     const id = displayed.id;
 
     const handleClick = () => {
-      const axios = getAxiosInstance(
-        settings.serverUrl,
-        setUser,
-        user.tokens?.refresh?.token
-      );
-
       axios
         .delete(`${settings.serverUrl}/api/files/delete`, {
           headers: {

@@ -114,14 +114,14 @@ const refresh = (dbClient) =>
         const isRevoked = await Auth.isTokenRevoked(t, tokenHash);
         if (isRevoked) {
           await Auth.revokeUserSubsequentTokens(t, tokenHash, email);
-          return false;
+          return true;
         }
         await Auth.revokeToken(t, tokenHash);
-        return true;
+        return false;
       });
 
       if (isRevoked) {
-        res.status(401).send("Invalid token, re-login");
+        res.status(401).send("Invalid token, re-login1");
         return;
       }
 
@@ -132,7 +132,7 @@ const refresh = (dbClient) =>
       });
     } catch (e) {
       console.log(e);
-      res.status(401).send("Invalid token, re-login");
+      res.status(401).send("Invalid token, re-login2");
     }
   });
 
