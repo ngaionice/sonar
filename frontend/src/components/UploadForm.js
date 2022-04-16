@@ -24,6 +24,164 @@ import { LoadingButton } from "@mui/lab";
 import { useSettings } from "../contexts/settingsContext";
 import getAxiosInstance from "../utilities/axios";
 import TagEditor from "./TagEditor";
+import RoleEditor from "./RoleEditor";
+
+const FileUploader = ({ setSelected }) => {
+  const handleFileSelection = () => {
+    const selector = document.getElementById("selectedFile");
+    setSelected({ type: "file", data: selector.files[0] });
+  };
+
+  useEffect(() => {
+    const listener = (e) => {
+      // Get the data of clipboard
+      const clipboardItems = e.clipboardData.items;
+      const items = [...clipboardItems].filter(
+        (item) => item.type.indexOf("image") !== -1
+      );
+      if (items.length === 0) {
+        return;
+      }
+
+      // Get the blob of image
+      const blob = items[0].getAsFile();
+      setSelected({ type: "file", data: blob });
+    };
+    document.addEventListener("paste", listener);
+    return () => {
+      document.removeEventListener("paste", listener);
+    };
+  }, [setSelected]);
+
+  return (
+    <Stack alignItems="center">
+      <Stack direction="row" spacing={1} alignItems="baseline">
+        <Button variant="contained" component="label">
+          Select image
+          <input
+            type="file"
+            id="selectedFile"
+            hidden
+            onChange={handleFileSelection}
+          />
+        </Button>
+        <Typography variant="body1">
+          or paste an image here with <kbd>Ctrl</kbd> + <kbd>V</kbd>.
+        </Typography>
+      </Stack>
+    </Stack>
+  );
+};
+
+const UrlUploader = ({ selected, setSelected }) => {
+  const handleChange = (e) => {
+    if (!e.target.value) {
+      setSelected({});
+    } else {
+      setSelected({ type: "url", data: e.target.value });
+    }
+  };
+
+  return (
+    <TextField
+      size="small"
+      label="URL"
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <CodeIcon />
+          </InputAdornment>
+        ),
+      }}
+      onChange={handleChange}
+      value={selected?.type === "url" ? selected?.data : ""}
+    />
+  );
+};
+
+const ModePicker = ({ setUploadMode, setSelected }) => {
+  const handleClick = (val) => {
+    setUploadMode(val);
+    setSelected({});
+  };
+
+  const modes = [
+    { icon: <AttachFileIcon />, label: "From files/clipboard" },
+    { icon: <LinkIcon />, label: "From link" },
+  ];
+  return (
+    <Stack direction="row" spacing={1} justifyContent="center" flex={1}>
+      {modes.map((obj, index) => (
+        <Tooltip title={obj.label} key={index} arrow>
+          <IconButton onClick={() => handleClick(index)}>{obj.icon}</IconButton>
+        </Tooltip>
+      ))}
+    </Stack>
+  );
+};
+
+const PreviewPanel = ({ selected }) => {
+  const FileName = () => {
+    if (selected?.type !== "file") return null;
+
+    return (
+      <Typography variant="body2" sx={{ paddingTop: "3px" }}>
+        {selected.data?.name ?? "Name not available"}
+      </Typography>
+    );
+  };
+
+  const PreviewImage = () => {
+    if (!selected.type) return null;
+
+    let src;
+    if (selected.type === "file") {
+      src = URL.createObjectURL(selected.data);
+    } else if (selected.type === "url") {
+      src = selected.data;
+    } else {
+      src = "";
+      alert("Invalid selected.type.");
+    }
+
+    return (
+      <>
+        <FileName />
+        <img
+          src={src}
+          alt="Upload preview"
+          style={{
+            maxWidth: "10rem",
+            width: "100%",
+            maxHeight: "10rem",
+            height: "100%",
+          }}
+        />
+      </>
+    );
+  };
+
+  return (
+    <Stack id="preview-panel" alignItems="center">
+      <PreviewImage />
+    </Stack>
+  );
+};
+
+const ImgurCheckbox = ({ isPublic, setIsPublic }) => {
+  const handleChangePublic = (e) => {
+    setIsPublic(e.target.checked);
+  };
+
+  return (
+    <FormControlLabel
+      control={<Checkbox checked={isPublic} onChange={handleChangePublic} />}
+      label="Also upload to Imgur"
+    />
+  );
+};
+
+const enforcedReadRoles = ["Admin"];
 
 function UploadForm() {
   const [user, setUser] = useUser();
@@ -31,6 +189,7 @@ function UploadForm() {
   const [selected, setSelected] = useState({});
   const [isPublic, setIsPublic] = useState(false);
   const [uploadMode, setUploadMode] = useState(0);
+  const [readRoles, setReadRoles] = useState([]);
   const [tags, setTags] = useState([]);
   const refreshTokenCall = useRef(null);
 
@@ -61,106 +220,15 @@ function UploadForm() {
   const reset = () => {
     setTags([]);
     setSelected({});
-  };
-
-  const FileUploader = () => {
-    const handleFileSelection = () => {
-      const selector = document.getElementById("selectedFile");
-      setSelected({ type: "file", data: selector.files[0] });
-    };
-
-    useEffect(() => {
-      const listener = (e) => {
-        // Get the data of clipboard
-        const clipboardItems = e.clipboardData.items;
-        const items = [...clipboardItems].filter(
-          (item) => item.type.indexOf("image") !== -1
-        );
-        if (items.length === 0) {
-          return;
-        }
-
-        // Get the blob of image
-        const blob = items[0].getAsFile();
-        setSelected({ type: "file", data: blob });
-      };
-      document.addEventListener("paste", listener);
-      return () => {
-        document.removeEventListener("paste", listener);
-      };
-    }, []);
-
-    return (
-      <Stack alignItems="center">
-        <Stack direction="row" spacing={1} alignItems="baseline">
-          <Button variant="contained" component="label">
-            Select image
-            <input
-              type="file"
-              id="selectedFile"
-              hidden
-              onChange={handleFileSelection}
-            />
-          </Button>
-          <Typography variant="body1">
-            or paste an image here with <kbd>Ctrl</kbd> + <kbd>V</kbd>.
-          </Typography>
-        </Stack>
-      </Stack>
-    );
-  };
-
-  const UrlUploader = () => {
-    const handleChange = (e) => {
-      setSelected({ type: "url", data: e.target.value });
-    };
-
-    return (
-      <TextField
-        size="small"
-        label="URL"
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <CodeIcon />
-            </InputAdornment>
-          ),
-        }}
-        onChange={handleChange}
-        value={selected?.type === "url" ? selected?.data : ""}
-      />
-    );
-  };
-
-  const ModePicker = () => {
-    const handleClick = (val) => {
-      setUploadMode(val);
-      setSelected({});
-    };
-
-    const modes = [
-      { icon: <AttachFileIcon />, label: "From files/clipboard" },
-      { icon: <LinkIcon />, label: "From link" },
-    ];
-    return (
-      <Stack direction="row" spacing={1} justifyContent="center" flex={1}>
-        {modes.map((obj, index) => (
-          <Tooltip title={obj.label} key={index} arrow>
-            <IconButton onClick={() => handleClick(index)}>
-              {obj.icon}
-            </IconButton>
-          </Tooltip>
-        ))}
-      </Stack>
-    );
+    setReadRoles(enforcedReadRoles);
   };
 
   const UploadOptions = () => {
     const Uploader = () => {
       if (uploadMode === 0) {
-        return <FileUploader />;
+        return <FileUploader setSelected={setSelected} />;
       } else if (uploadMode === 1) {
-        return <UrlUploader />;
+        return <UrlUploader selected={selected} setSelected={setSelected} />;
       } else {
         return null;
       }
@@ -168,70 +236,9 @@ function UploadForm() {
 
     return (
       <Stack spacing={1}>
-        <ModePicker />
+        <ModePicker setSelected={setSelected} setUploadMode={setUploadMode} />
         <Uploader />
       </Stack>
-    );
-  };
-
-  const PreviewPanel = () => {
-    const FileName = () => {
-      if (selected?.type !== "file") return null;
-
-      return (
-        <Typography variant="body2" sx={{ paddingTop: "3px" }}>
-          {selected.data?.name ?? "Name not available"}
-        </Typography>
-      );
-    };
-
-    const PreviewImage = () => {
-      if (!selected.type) return null;
-
-      let src;
-      if (selected.type === "file") {
-        src = URL.createObjectURL(selected.data);
-      } else if (selected.type === "url") {
-        src = selected.data;
-      } else {
-        src = "";
-        alert("Invalid selected.type.");
-      }
-
-      return (
-        <>
-          <FileName />
-          <img
-            src={src}
-            alt="Upload preview"
-            style={{
-              maxWidth: "10rem",
-              width: "100%",
-              maxHeight: "10rem",
-              height: "100%",
-            }}
-          />
-        </>
-      );
-    };
-
-    return (
-      <Stack id="preview-panel" alignItems="center">
-        <PreviewImage />
-      </Stack>
-    );
-  };
-
-  const PublicCheckbox = () => {
-    const handleChangePublic = (e) => {
-      setIsPublic(e.target.checked);
-    };
-
-    return (
-      <FormControlLabel
-        control={<Checkbox checked={isPublic} onChange={handleChangePublic} />}
-        label="Share publicly"
-      />
     );
   };
 
@@ -260,6 +267,7 @@ function UploadForm() {
           alert("Illegal selected.type value.");
       }
       formData.append("tags", JSON.stringify(tags));
+      formData.append("readRoles", JSON.stringify(readRoles));
       if (isPublic) {
         formData.append("isPublic", "1");
       }
@@ -273,9 +281,7 @@ function UploadForm() {
       axios
         .post(`/files/upload`, formData, config)
         .catch((e) => {
-          // TODO: some error handling?
-          console.log(e);
-          alert("Failed to upload file.");
+          alert(`Error ${e.response.status}: ${e.response.data}`);
         })
         .then(() => {
           if (uploadMode === 0) {
@@ -302,9 +308,14 @@ function UploadForm() {
       <Container maxWidth="md" sx={{ paddingY: 3 }}>
         <Stack spacing={2}>
           <UploadOptions />
-          <PreviewPanel />
+          <PreviewPanel selected={selected} />
           <TagEditor tags={tags} setTags={setTags} />
-          <PublicCheckbox />
+          <RoleEditor
+            roles={readRoles}
+            setRoles={setReadRoles}
+            enforcedRoles={enforcedReadRoles}
+          />
+          <ImgurCheckbox isPublic={isPublic} setIsPublic={setIsPublic} />
         </Stack>
       </Container>
     );

@@ -1,5 +1,6 @@
 import {
   Autocomplete,
+  Chip,
   IconButton,
   Stack,
   TextField,
@@ -100,7 +101,7 @@ function RoleAdder({ setDisplay, setReload }) {
   );
 }
 
-function RoleSelector({ roles, setRoles, reload, setReload }) {
+function RoleSelector({ roles, setRoles, reload, setReload, enforcedRoles }) {
   const [user, setUser] = useUser();
   const [settings] = useSettings();
   const refreshTokenCall = useRef(null);
@@ -145,6 +146,19 @@ function RoleSelector({ roles, setRoles, reload, setReload }) {
     };
   }, [settings, user, reload, setReload, setUser]);
 
+  useEffect(() => {
+    const rolesToAdd = [];
+
+    enforcedRoles.forEach((role) => {
+      if (!roles.includes(role) && roleOptions.includes(role)) {
+        rolesToAdd.push(role);
+      }
+    });
+    if (rolesToAdd.length > 0) {
+      setRoles([...roles, ...rolesToAdd]);
+    }
+  }, [roles, setRoles, roleOptions, enforcedRoles]);
+
   const extractOption = (option) => option;
 
   return (
@@ -156,13 +170,30 @@ function RoleSelector({ roles, setRoles, reload, setReload }) {
       filterSelectedOptions
       fullWidth
       renderInput={(params) => <TextField {...params} label="Roles" />}
+      renderTags={(tagValue, getTagProps) =>
+        tagValue.map((option, index) => (
+          <Chip
+            label={option}
+            {...getTagProps({ index })}
+            disabled={enforcedRoles.includes(option)}
+          />
+        ))
+      }
       value={roles}
       onChange={(e, nv) => setRoles(nv)}
     />
   );
 }
 
-function RoleEditor({ roles, setRoles }) {
+/**
+ * @param props
+ * @param {string[]} props.roles The currently selected roles.
+ * @param {function} props.setRoles A React setState function for setting the selected roles.
+ * @param {boolean} props.enableAdd True to show the add role button, false otherwise.
+ * @param {string[]} props.enforcedRoles Roles that must always be included. Optional.
+ * @returns {JSX.Element}
+ */
+function RoleEditor({ roles, setRoles, enableAdd, enforcedRoles }) {
   const [showAdder, setShowAdder] = useState(false);
   const [reload, setReload] = useState(true);
 
@@ -174,13 +205,16 @@ function RoleEditor({ roles, setRoles }) {
     return <RoleAdder setDisplay={setShowAdder} setReload={setReload} />;
   }
 
-  const AddRoleButton = () => (
-    <Tooltip title="Add new role" arrow>
-      <IconButton onClick={handleAddClick}>
-        <AddIcon />
-      </IconButton>
-    </Tooltip>
-  );
+  const AddRoleButton = () => {
+    if (!enableAdd) return null;
+    return (
+      <Tooltip title="Add new role" arrow>
+        <IconButton onClick={handleAddClick}>
+          <AddIcon />
+        </IconButton>
+      </Tooltip>
+    );
+  };
 
   return (
     <Stack spacing={2} direction="row" alignItems="center" flexGrow={1}>
@@ -189,6 +223,7 @@ function RoleEditor({ roles, setRoles }) {
         setRoles={setRoles}
         reload={reload}
         setReload={setReload}
+        enforcedRoles={enforcedRoles ?? []}
       />
       <AddRoleButton />
     </Stack>

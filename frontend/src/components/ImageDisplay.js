@@ -18,6 +18,7 @@ import { useUser } from "../contexts/userContext";
 import { Masonry } from "@mui/lab";
 import { useSettings } from "../contexts/settingsContext";
 import getAxiosInstance from "../utilities/axios";
+import ConditionalRenderer from "./ConditionalRenderer";
 
 function ImageDisplay({ images }) {
   const [user, setUser] = useUser();
@@ -145,7 +146,9 @@ function ImageDisplay({ images }) {
             </Box>
           </Box>
           <UrlDisplay />
-          <DeleteButton />
+          <ConditionalRenderer condition="loggedInAdmin">
+            <DeleteButton />
+          </ConditionalRenderer>
         </Stack>
       </Container>
     );

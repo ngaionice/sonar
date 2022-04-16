@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import * as Imgur from "../storage/imgur-manager.js";
 import * as AWS from "../storage/aws-manager.js";
 import * as File from "../database/file.js";
+import { getAllRoles } from "../database/user.js";
 import {
   getDataFromUpload,
   getDataFromUrl,
@@ -23,17 +24,27 @@ const upload = (dbClient) =>
       console.log("Failed data extraction.");
       return;
     }
-    const { buffer, name, tags, isPublic } = data;
+    const { buffer, name, tags, readRoles, isPublic } = data;
+    console.log(data);
 
     const out = {};
 
     const { key, url: awsUrl } = await AWS.upload(buffer, name);
     out.aws = awsUrl;
 
-    let readRoles = 1;
-    // TODO: update readRoles based on passed in values from request
+    let readRolesVal = 1;
+    const rolesArray = await getAllRoles(dbClient);
+    readRoles.forEach((role) => {
+      for (const roleObj of rolesArray) {
+        if (role === roleObj.title) {
+          readRolesVal *= roleObj.id;
+          break;
+        }
+      }
+    });
+
     try {
-      await File.insertImage(dbClient, key, awsUrl, !!isPublic, readRoles);
+      await File.insertImage(dbClient, key, awsUrl, !!isPublic, readRolesVal);
       await File.insertImageTags(dbClient, key, tags);
     } catch (e) {
       console.log("Tag insertion failed.");

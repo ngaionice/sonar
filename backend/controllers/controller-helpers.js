@@ -14,6 +14,14 @@ const getTags = (tagsString) => {
   return tags;
 };
 
+const getRoles = (rolesString) => {
+  if (rolesString) {
+    const temp = JSON.parse(rolesString);
+    return Array.isArray(temp) ? temp : [];
+  }
+  return [];
+};
+
 const getNewFilename = (filename, extension) =>
   String(Math.floor(Date.now() / 1000)).concat(
     "-",
@@ -28,7 +36,7 @@ const isValidFiletype = (type) => {
 
 const getDataFromUpload = (req, res) => {
   const { buffer, size, mimetype, originalname: oldName } = req.file;
-  const { tags: tagsString, isPublic } = req.body;
+  const { tags: tagsString, isPublic, readRoles: readRolesString } = req.body;
 
   if (!isValidFiletype(mimetype)) {
     res.status(400).send("Invalid file type");
@@ -41,18 +49,26 @@ const getDataFromUpload = (req, res) => {
   }
 
   const tags = getTags(tagsString);
+  const readRoles = getRoles(readRolesString);
   const name = getNewFilename(oldName);
   return {
     buffer,
     name,
     tags,
+    readRoles,
     isPublic,
   };
 };
 
 const getDataFromUrl = async (req, res) => {
-  const { tags: tagsString, isPublic, srcUrl } = req.body;
+  const {
+    tags: tagsString,
+    isPublic,
+    srcUrl,
+    readRoles: readRolesString,
+  } = req.body;
   const tags = getTags(tagsString);
+  const readRoles = getRoles(readRolesString);
 
   if (!srcUrl) {
     res.status(400).send("No URL found");
@@ -83,6 +99,7 @@ const getDataFromUrl = async (req, res) => {
     buffer,
     name,
     tags,
+    readRoles,
     isPublic,
   };
 };

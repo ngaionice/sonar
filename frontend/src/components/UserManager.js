@@ -94,7 +94,7 @@ function UserCreator({ setFetchOnChange }) {
                   onChange={handleNameChange}
                   fullWidth
                 />
-                <RoleEditor roles={roles} setRoles={setRoles} />
+                <RoleEditor roles={roles} setRoles={setRoles} enableAdd />
               </Stack>
             </Container>
           </DialogContent>
@@ -169,7 +169,7 @@ function UserEntry({ email, details, axios, setFetchOnChange }) {
             autoFocus // TODO: figure out what makes it lose focus every time
             fullWidth
           />
-          <RoleEditor roles={currRoles} setRoles={setCurrRoles} />
+          <RoleEditor roles={currRoles} setRoles={setCurrRoles} enableAdd />
         </Stack>
       </Container>
     );
