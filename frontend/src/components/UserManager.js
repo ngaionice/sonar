@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Button,
   Chip,
-  CircularProgress,
   Container,
   Dialog,
   DialogActions,
@@ -19,6 +18,7 @@ import { useUser } from "../contexts/userContext";
 import { useSettings } from "../contexts/settingsContext";
 import getAxiosInstance from "../utilities/axios";
 import RoleEditor from "./RoleEditor";
+import Loader from "./Loader";
 
 function UserCreator({ setFetchOnChange }) {
   const [user, setUser] = useUser();
@@ -247,7 +247,7 @@ function UserManager({ fetchOnChange, setFetchOnChange }) {
   }, [setUsers, settings, user, fetchOnChange, axios]);
 
   if (loading) {
-    return <CircularProgress />;
+    return <Loader />;
   }
 
   return (
