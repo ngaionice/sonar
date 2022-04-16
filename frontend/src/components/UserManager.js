@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Button,
   Chip,
@@ -14,24 +14,11 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { useUser } from "../contexts/userContext";
-import { useSettings } from "../contexts/settingsContext";
-import getAxiosInstance from "../utilities/axios";
+import { axios } from "../utilities/axios";
 import RoleEditor from "./RoleEditor";
 import Loader from "./Loader";
 
 function UserCreator({ setFetchOnChange }) {
-  const [user, setUser] = useUser();
-  const [settings] = useSettings();
-  const refreshTokenCall = useRef(null);
-
-  const axios = getAxiosInstance(
-    settings.serverUrl,
-    setUser,
-    user.tokens?.refresh?.token,
-    refreshTokenCall
-  );
-
   const AddUserButton = () => {
     const [open, setOpen] = useState(false);
     const [email, setEmail] = useState("");
@@ -39,18 +26,10 @@ function UserCreator({ setFetchOnChange }) {
     const [roles, setRoles] = useState([]);
 
     const handleSave = () => {
-      axios
-        .post(
-          "/users/one",
-          { email, name, roles },
-          {
-            headers: { Authorization: `Bearer ${user?.tokens?.access?.token}` },
-          }
-        )
-        .then(() => {
-          setFetchOnChange(new Date());
-          handleClose();
-        });
+      axios.post("/users/one", { email, name, roles }, {}).then(() => {
+        setFetchOnChange(new Date());
+        handleClose();
+      });
     };
 
     const handleOpen = () => {
@@ -116,8 +95,7 @@ function UserCreator({ setFetchOnChange }) {
   );
 }
 
-function UserEntry({ email, details, axios, setFetchOnChange }) {
-  const [user] = useUser();
+function UserEntry({ email, details, setFetchOnChange }) {
   const [roles, setRoles] = useState(details.roles || []);
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -130,11 +108,7 @@ function UserEntry({ email, details, axios, setFetchOnChange }) {
 
   const handleSave = () => {
     axios
-      .put(
-        "/users/one",
-        { email, name: currName, roles: currRoles },
-        { headers: { Authorization: `Bearer ${user?.tokens?.access?.token}` } }
-      )
+      .put("/users/one", { email, name: currName, roles: currRoles })
       .then(() => {
         details.name = currName;
         setRoles(currRoles);
@@ -145,7 +119,6 @@ function UserEntry({ email, details, axios, setFetchOnChange }) {
   const handleDelete = () => {
     axios
       .delete("/users/one", {
-        headers: { Authorization: `Bearer ${user?.tokens?.access?.token}` },
         params: { email },
       })
       .then(() => {
@@ -210,30 +183,13 @@ function UserEntry({ email, details, axios, setFetchOnChange }) {
 }
 
 function UserManager({ fetchOnChange, setFetchOnChange }) {
-  const [user, setUser] = useUser();
-  const [settings] = useSettings();
-
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState({});
-  const refreshTokenCall = useRef(null);
-
-  const axios = useMemo(
-    () =>
-      getAxiosInstance(
-        settings.serverUrl,
-        setUser,
-        user.tokens?.refresh?.token,
-        refreshTokenCall
-      ),
-    [settings, user, setUser]
-  );
 
   useEffect(() => {
     let mounted = true;
     const fetchUsers = async () => {
-      const res = await axios.get("/users/all", {
-        headers: { Authorization: `Bearer ${user?.tokens?.access?.token}` },
-      });
+      const res = await axios.get("/users/all");
       const { users } = res.data;
       return users;
     };
@@ -249,7 +205,7 @@ function UserManager({ fetchOnChange, setFetchOnChange }) {
     return () => {
       mounted = false;
     };
-  }, [setUsers, settings, user, fetchOnChange, axios]);
+  }, [setUsers, fetchOnChange, axios]);
 
   if (loading) {
     return <Loader />;
@@ -262,7 +218,6 @@ function UserManager({ fetchOnChange, setFetchOnChange }) {
           key={k}
           email={k}
           details={v}
-          axios={axios}
           setFetchOnChange={setFetchOnChange}
         />
       ))}

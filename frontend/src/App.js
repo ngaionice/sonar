@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { UserProvider } from "./contexts/userContext";
+import { UserProvider, useUser } from "./contexts/userContext";
 import { Route, Routes } from "react-router-dom";
 import AppBar from "./components/AppBar";
 import {
@@ -17,6 +17,7 @@ import SearchPage from "./pages/SearchPage";
 import { SettingsProvider, useSettings } from "./contexts/settingsContext";
 import ManageUsersPage from "./pages/ManageUsersPage";
 import ToolbarMenu from "./components/ToolbarMenu";
+import { updateInstance } from "./utilities/axios";
 
 function initializeFirebase() {
   const firebaseConfig = {
@@ -32,7 +33,13 @@ function initializeFirebase() {
 }
 
 function ThemedApp({ children }) {
+  const [user, setUser] = useUser();
   const [settings] = useSettings();
+
+  useEffect(() => {
+    updateInstance(settings.serverUrl, user?.tokens, setUser);
+  }, [user, setUser, settings]);
+
   return (
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={getTheme(settings.darkMode)}>

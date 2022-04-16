@@ -9,32 +9,39 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
-import { useUser } from "../contexts/userContext";
 import { Masonry } from "@mui/lab";
-import { useSettings } from "../contexts/settingsContext";
-import getAxiosInstance from "../utilities/axios";
+import { axios } from "../utilities/axios";
 import ConditionalRenderer from "./ConditionalRenderer";
 
-function ImageDisplay({ images }) {
-  const [user, setUser] = useUser();
-  const [settings] = useSettings();
-  const refreshTokenCall = useRef(null);
-
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [displayed, setDisplayed] = useState(null);
+const UrlDisplay = ({ displayed }) => {
   const [displayIcon, setDisplayIcon] = useState(<ContentCopyIcon />);
 
-  const axios = getAxiosInstance(
-    settings.serverUrl,
-    setUser,
-    user.tokens?.refresh?.token,
-    refreshTokenCall
+  if (!displayed?.url) return null;
+  const url = displayed.url;
+
+  const handleClick = () => {
+    navigator.clipboard.writeText(url).then(() => {
+      setDisplayIcon(<CheckIcon />);
+      setTimeout(() => setDisplayIcon(<ContentCopyIcon />), 2000);
+    });
+  };
+
+  return (
+    <Stack direction="row" spacing={1} alignItems="center">
+      <TextField disabled value={url} size="small" fullWidth />
+      <IconButton onClick={handleClick}>{displayIcon}</IconButton>
+    </Stack>
   );
+};
+
+function ImageDisplay({ images }) {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [displayed, setDisplayed] = useState(null);
 
   const ListEntry = ({ image }) => {
     const { id: title, url: img } = image;
@@ -82,35 +89,13 @@ function ImageDisplay({ images }) {
     );
   };
 
-  const UrlDisplay = () => {
-    if (!displayed?.url) return null;
-    const url = displayed.url;
-
-    const handleClick = () => {
-      navigator.clipboard.writeText(url).then(() => {
-        setDisplayIcon(<CheckIcon />);
-        setTimeout(() => setDisplayIcon(<ContentCopyIcon />), 2000);
-      });
-    };
-
-    return (
-      <Stack direction="row" spacing={1} alignItems="center">
-        <TextField disabled value={url} size="small" fullWidth />
-        <IconButton onClick={handleClick}>{displayIcon}</IconButton>
-      </Stack>
-    );
-  };
-
   const DeleteButton = () => {
     if (!displayed?.id || isNaN(displayed?.index)) return null;
     const id = displayed.id;
 
     const handleClick = () => {
       axios
-        .delete(`${settings.serverUrl}/api/files/delete`, {
-          headers: {
-            Authorization: `Bearer ${user?.tokens?.access?.token}`,
-          },
+        .delete(`/files/delete`, {
           params: {
             keys: JSON.stringify([id]),
           },
@@ -145,7 +130,7 @@ function ImageDisplay({ images }) {
               <img src={displayed?.url ?? ""} alt="Upload preview" />
             </Box>
           </Box>
-          <UrlDisplay />
+          <UrlDisplay displayed={displayed} />
           <ConditionalRenderer condition="loggedInAdmin">
             <DeleteButton />
           </ConditionalRenderer>

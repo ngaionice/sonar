@@ -6,28 +6,15 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
-import { useUser } from "../contexts/userContext";
-import { useSettings } from "../contexts/settingsContext";
-import getAxiosInstance from "../utilities/axios";
+import { useEffect, useState } from "react";
+import { axios } from "../utilities/axios";
 
 import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SaveIcon from "@mui/icons-material/Save";
 
 function RoleAdder({ setDisplay, setReload }) {
-  const [user, setUser] = useUser();
-  const [settings] = useSettings();
   const [name, setName] = useState("");
-
-  const refreshTokenCall = useRef(null);
-
-  const axios = getAxiosInstance(
-    settings.serverUrl,
-    setUser,
-    user.tokens?.refresh?.token,
-    refreshTokenCall
-  );
 
   const handleNameChange = (e) => {
     setName(e.target.value);
@@ -38,13 +25,7 @@ function RoleAdder({ setDisplay, setReload }) {
   };
 
   const handleSave = async () => {
-    await axios.post(
-      "/users/role",
-      { name },
-      {
-        headers: { Authorization: `Bearer ${user?.tokens?.access?.token}` },
-      }
-    );
+    await axios.post("/users/role", { name });
     handleClose();
     if (!setReload) {
       throw new Error(
@@ -102,10 +83,6 @@ function RoleAdder({ setDisplay, setReload }) {
 }
 
 function RoleSelector({ roles, setRoles, reload, setReload, enforcedRoles }) {
-  const [user, setUser] = useUser();
-  const [settings] = useSettings();
-  const refreshTokenCall = useRef(null);
-
   const [roleOptions, setRoleOptions] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -117,17 +94,8 @@ function RoleSelector({ roles, setRoles, reload, setReload, enforcedRoles }) {
       };
     }
 
-    const axios = getAxiosInstance(
-      settings.serverUrl,
-      setUser,
-      user.tokens?.refresh?.token,
-      refreshTokenCall
-    );
-
     const fetchRoles = async () => {
-      const res = await axios.get("/users/roles", {
-        headers: { Authorization: `Bearer ${user?.tokens?.access?.token}` },
-      });
+      const res = await axios.get("/users/roles");
       const { roles } = res.data;
       return roles;
     };
@@ -144,7 +112,7 @@ function RoleSelector({ roles, setRoles, reload, setReload, enforcedRoles }) {
     return () => {
       mounted = false;
     };
-  }, [settings, user, reload, setReload, setUser]);
+  }, [reload, setReload]);
 
   useEffect(() => {
     const rolesToAdd = [];

@@ -13,7 +13,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "../contexts/userContext";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -21,8 +21,7 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CodeIcon from "@mui/icons-material/Code";
 import LinkIcon from "@mui/icons-material/Link";
 import { LoadingButton } from "@mui/lab";
-import { useSettings } from "../contexts/settingsContext";
-import getAxiosInstance from "../utilities/axios";
+import { axios } from "../utilities/axios";
 import TagEditor from "./TagEditor";
 import RoleEditor from "./RoleEditor";
 
@@ -184,23 +183,14 @@ const ImgurCheckbox = ({ isPublic, setIsPublic }) => {
 const enforcedReadRoles = ["Admin"];
 
 function UploadForm() {
-  const [user, setUser] = useUser();
-  const [settings] = useSettings();
+  const [user] = useUser();
   const [selected, setSelected] = useState({});
   const [isPublic, setIsPublic] = useState(false);
   const [uploadMode, setUploadMode] = useState(0);
   const [readRoles, setReadRoles] = useState([]);
   const [tags, setTags] = useState([]);
-  const refreshTokenCall = useRef(null);
 
   const [dialogOpen, setDialogOpen] = useState(false);
-
-  const axios = getAxiosInstance(
-    settings.serverUrl,
-    setUser,
-    user.tokens?.refresh?.token,
-    refreshTokenCall
-  );
 
   const uploadHotkeyListener = (e) => {
     if ((e.metaKey || e.ctrlKey) && e.code === "KeyA") {
@@ -272,14 +262,8 @@ function UploadForm() {
         formData.append("isPublic", "1");
       }
 
-      const config = {
-        headers: {
-          Authorization: `Bearer ${user?.tokens?.access?.token}`,
-        },
-      };
-
       axios
-        .post(`/files/upload`, formData, config)
+        .post(`/files/upload`, formData)
         .catch((e) => {
           alert(`Error ${e.response.status}: ${e.response.data}`);
         })
