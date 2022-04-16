@@ -20,7 +20,6 @@ function createAxiosInstance() {
       if (request.url.match(/^\/(?:files|users)\/\w+/)) {
         request.headers.Authorization = `Bearer ${tokens?.access?.token}`;
       }
-      console.log(request);
       return request;
     },
     (err) => Promise.reject(err)

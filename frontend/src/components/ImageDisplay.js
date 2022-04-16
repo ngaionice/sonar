@@ -4,6 +4,9 @@ import {
   ButtonBase,
   Container,
   Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   Stack,
   TextField,
@@ -18,11 +21,19 @@ import { Masonry } from "@mui/lab";
 import { axios } from "../utilities/axios";
 import ConditionalRenderer from "./ConditionalRenderer";
 
-const UrlDisplay = ({ displayed }) => {
-  const [displayIcon, setDisplayIcon] = useState(<ContentCopyIcon />);
+function getUrls(baseUrl) {
+  const urlModifiers = "w=248&fit=crop&auto=format";
+  const urlSetModifiers = "&dpr=2 2x";
 
-  if (!displayed?.url) return null;
-  const url = displayed.url;
+  const extension = baseUrl.indexOf("?") === -1 ? "?" : "&";
+
+  const srcUrl = baseUrl + extension + urlModifiers;
+  const srcSetUrl = baseUrl + extension + urlModifiers + urlSetModifiers;
+  return [srcUrl, srcSetUrl];
+}
+
+const UrlDisplay = ({ url }) => {
+  const [displayIcon, setDisplayIcon] = useState(<ContentCopyIcon />);
 
   const handleClick = () => {
     navigator.clipboard.writeText(url).then(() => {
@@ -32,113 +43,114 @@ const UrlDisplay = ({ displayed }) => {
   };
 
   return (
-    <Stack direction="row" spacing={1} alignItems="center">
+    <Stack direction="row" spacing={2} alignItems="center">
       <TextField disabled value={url} size="small" fullWidth />
       <IconButton onClick={handleClick}>{displayIcon}</IconButton>
     </Stack>
   );
 };
 
-function ImageDisplay({ images }) {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [displayed, setDisplayed] = useState(null);
+const DeleteButton = ({ imageId, index, handleClose, onDeleteCallback }) => {
+  if (!imageId || isNaN(index)) return null;
 
-  const ListEntry = ({ image }) => {
-    const { id: title, url: img } = image;
-
-    if (!img) {
-      alert("Invalid file omitted.");
-      return null;
-    }
-
-    const urlModifiers = "w=248&fit=crop&auto=format";
-    const urlSetModifiers = "&dpr=2 2x";
-
-    const extension = img.indexOf("?") === -1 ? "?" : "&";
-
-    const srcUrl = img + extension + urlModifiers;
-    const srcSetUrl = img + extension + urlModifiers + urlSetModifiers;
-
-    const handleClick = () => {
-      setDisplayed(image);
-      setDialogOpen(true);
-    };
-
-    return (
-      <div
-        style={{
-          textAlign: "center",
-          display: "block",
-        }}
-      >
-        <ButtonBase onClick={handleClick}>
-          <img
-            src={srcUrl}
-            srcSet={srcSetUrl}
-            alt={title}
-            loading="lazy"
-            style={{
-              maxWidth: "18rem",
-              width: "100%",
-              maxHeight: "18rem",
-              height: "100%",
-            }}
-          />
-        </ButtonBase>
-      </div>
-    );
+  const handleClick = () => {
+    axios
+      .delete(`/files/delete`, {
+        params: {
+          keys: JSON.stringify([imageId]),
+        },
+      })
+      .then(() => {
+        onDeleteCallback();
+        handleClose();
+      });
   };
 
-  const DeleteButton = () => {
-    if (!displayed?.id || isNaN(displayed?.index)) return null;
-    const id = displayed.id;
+  return (
+    <Button onClick={handleClick} color="error" variant="contained">
+      Delete
+    </Button>
+  );
+};
 
-    const handleClick = () => {
-      axios
-        .delete(`/files/delete`, {
-          params: {
-            keys: JSON.stringify([id]),
-          },
-        })
-        .then(() => {
-          images.data.splice(displayed.index, 1);
-          handleClose();
-        });
-    };
+function ImageEntryDialogContent({ url, title }) {
+  return (
+    <Container maxWidth="md" sx={{ paddingTop: 3 }}>
+      <Stack spacing={2}>
+        <Box display="flex" justifyContent="center" flexGrow={1}>
+          <Box
+            sx={{ width: "50%", maxHeight: "50%" }}
+            display="flex"
+            justifyContent="center"
+          >
+            <img src={url ?? ""} alt={title ?? ""} />
+          </Box>
+        </Box>
+        <UrlDisplay url={url} />
+      </Stack>
+    </Container>
+  );
+}
 
-    return (
-      <Button onClick={handleClick} color="error" variant="contained">
-        Delete
-      </Button>
-    );
+function ImageEntry({ image, onDeleteCallback, index }) {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { id: title, url: img } = image;
+
+  if (!img) {
+    alert("Invalid file passed to ImageEntry.");
+    return null;
+  }
+
+  const [srcUrl, srcSetUrl] = getUrls(img);
+
+  const handleClick = () => {
+    setDialogOpen(true);
   };
 
   const handleClose = () => {
     setDialogOpen(false);
   };
 
-  const DialogContent = () => {
-    return (
-      <Container maxWidth="md" sx={{ paddingY: 3 }}>
-        <Stack spacing={2}>
-          <Box display="flex" justifyContent="center" flexGrow={1}>
-            <Box
-              sx={{ width: "50%", maxHeight: "50%" }}
-              display="flex"
-              justifyContent="center"
-            >
-              <img src={displayed?.url ?? ""} alt="Upload preview" />
-            </Box>
-          </Box>
-          <UrlDisplay displayed={displayed} />
-          <ConditionalRenderer condition="loggedInAdmin">
-            <DeleteButton />
-          </ConditionalRenderer>
-        </Stack>
-      </Container>
-    );
-  };
+  return (
+    <>
+      <ButtonBase onClick={handleClick}>
+        <img
+          src={srcUrl}
+          srcSet={srcSetUrl}
+          alt={title}
+          loading="lazy"
+          style={{
+            maxWidth: "18rem",
+            width: "100%",
+            maxHeight: "18rem",
+            height: "100%",
+          }}
+        />
+      </ButtonBase>
 
+      <Dialog open={dialogOpen} onClose={handleClose} fullWidth maxWidth="md">
+        <DialogTitle>{title}</DialogTitle>
+
+        <DialogContent>
+          <ImageEntryDialogContent url={img} title={title} />
+        </DialogContent>
+
+        <ConditionalRenderer condition="loggedInAdmin">
+          <DialogActions>
+            <DeleteButton
+              handleClose={handleClose}
+              imageId={title}
+              index={index}
+              onDeleteCallback={onDeleteCallback}
+            />
+          </DialogActions>
+        </ConditionalRenderer>
+      </Dialog>
+    </>
+  );
+}
+
+function ImageDisplay({ images }) {
   if (!images?.data) {
     return (
       <Stack alignItems="center">
@@ -161,12 +173,19 @@ function ImageDisplay({ images }) {
       <Masonry columns={4} spacing={2}>
         {images.data.map((image, index) => {
           image.index = index;
-          return <ListEntry key={image.id} image={image} />;
+          const onDeleteCallback = () => {
+            images.data.splice(index, 1);
+          };
+          return (
+            <ImageEntry
+              key={image.id}
+              image={image}
+              index={index}
+              onDeleteCallback={onDeleteCallback}
+            />
+          );
         })}
       </Masonry>
-      <Dialog open={dialogOpen} onClose={handleClose} fullWidth maxWidth="md">
-        <DialogContent />
-      </Dialog>
     </>
   );
 }

@@ -1,9 +1,9 @@
-import { InputAdornment, Stack, TextField } from "@mui/material";
+import { InputAdornment, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { axios } from "../utilities/axios";
 import SearchIcon from "@mui/icons-material/Search";
 
-function SearchModule({ setResults }) {
+function ImageSearch({ setResults }) {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
@@ -45,6 +45,7 @@ function SearchModule({ setResults }) {
         size="small"
         onChange={handleTermChange}
         value={searchTerm}
+        fullWidth
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -52,16 +53,11 @@ function SearchModule({ setResults }) {
             </InputAdornment>
           ),
         }}
-        fullWidth
       />
     );
   };
 
-  return (
-    <Stack direction="row" spacing={2} alignItems="center">
-      <SearchField />
-    </Stack>
-  );
+  return <SearchField />;
 }
 
-export default SearchModule;
+export default ImageSearch;
