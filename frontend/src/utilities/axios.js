@@ -17,7 +17,7 @@ function createAxiosInstance() {
 
   inst.interceptors.request.use(
     (request) => {
-      if (request.url.match(/^(?:\/files|users)\/\w+/)) {
+      if (request.url.match(/^\/(?:files|users)\/\w+/)) {
         request.headers.Authorization = `Bearer ${tokens?.access?.token}`;
       }
       console.log(request);
