@@ -57,7 +57,7 @@ function SettingsModule() {
           <SettingsIcon />
         </IconButton>
       </Tooltip>
-      <Dialog open={open} onClose={handleClose} fullWidth>
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
         <DialogTitle>Settings</DialogTitle>
         <DialogContent />
         <DialogActions>

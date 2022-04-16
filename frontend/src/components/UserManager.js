@@ -77,7 +77,7 @@ function UserCreator({ setFetchOnChange }) {
         <Button onClick={handleOpen} fullWidth variant="outlined">
           Add User
         </Button>
-        <Dialog open={open} onClose={handleClose} fullWidth>
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
           <DialogTitle>Add User</DialogTitle>
           <DialogContent>
             <Container maxWidth="md" sx={{ paddingY: 3 }}>
@@ -185,7 +185,12 @@ function UserEntry({ email, details, axios, setFetchOnChange }) {
           ))}
         </Stack>
       </ListItemButton>
-      <Dialog open={dialogOpen} onClose={handleDialogClose} fullWidth>
+      <Dialog
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        fullWidth
+        maxWidth="md"
+      >
         <DialogTitle>Edit user</DialogTitle>
         <DialogContent>
           <DialogContents />

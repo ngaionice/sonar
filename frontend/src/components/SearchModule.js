@@ -1,8 +1,9 @@
-import { Stack, TextField } from "@mui/material";
+import { InputAdornment, Stack, TextField } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { useUser } from "../contexts/userContext";
 import { useSettings } from "../contexts/settingsContext";
 import getAxiosInstance from "../utilities/axios";
+import SearchIcon from "@mui/icons-material/Search";
 
 function SearchModule({ setResults }) {
   const [user, setUser] = useUser();
@@ -56,9 +57,15 @@ function SearchModule({ setResults }) {
       <TextField
         autoFocus
         size="small"
-        label="Search term"
         onChange={handleTermChange}
         value={searchTerm}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+        }}
         fullWidth
       />
     );

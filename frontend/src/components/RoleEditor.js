@@ -55,7 +55,7 @@ function RoleAdder({ setDisplay, setReload }) {
 
   const BackButton = () => {
     return (
-      <Tooltip title="Back">
+      <Tooltip title="Back" arrow>
         <IconButton onClick={handleClose}>
           <ArrowBackIcon />
         </IconButton>
@@ -66,7 +66,7 @@ function RoleAdder({ setDisplay, setReload }) {
   const SaveButton = () => {
     if (!name) {
       return (
-        <Tooltip title="Save new role">
+        <Tooltip title="Save new role" arrow>
           <span>
             <IconButton onClick={handleSave} disabled>
               <SaveIcon />
@@ -77,7 +77,7 @@ function RoleAdder({ setDisplay, setReload }) {
     }
 
     return (
-      <Tooltip title="Save new role">
+      <Tooltip title="Save new role" arrow>
         <IconButton onClick={handleSave}>
           <SaveIcon />
         </IconButton>
@@ -92,6 +92,7 @@ function RoleAdder({ setDisplay, setReload }) {
         label="Role name"
         value={name}
         onChange={handleNameChange}
+        fullWidth
       />
       <BackButton />
       <SaveButton />
@@ -174,7 +175,7 @@ function RoleEditor({ roles, setRoles }) {
   }
 
   const AddRoleButton = () => (
-    <Tooltip title="Add new role">
+    <Tooltip title="Add new role" arrow>
       <IconButton onClick={handleAddClick}>
         <AddIcon />
       </IconButton>

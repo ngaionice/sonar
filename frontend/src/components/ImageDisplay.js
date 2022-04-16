@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   ButtonBase,
   Container,
@@ -134,7 +135,15 @@ function ImageDisplay({ images }) {
     return (
       <Container maxWidth="md" sx={{ paddingY: 3 }}>
         <Stack spacing={2}>
-          <img src={displayed?.url ?? ""} alt="Upload preview" />
+          <Box display="flex" justifyContent="center" flexGrow={1}>
+            <Box
+              sx={{ width: "50%", maxHeight: "50%" }}
+              display="flex"
+              justifyContent="center"
+            >
+              <img src={displayed?.url ?? ""} alt="Upload preview" />
+            </Box>
+          </Box>
           <UrlDisplay />
           <DeleteButton />
         </Stack>
@@ -167,7 +176,7 @@ function ImageDisplay({ images }) {
           return <ListEntry key={image.id} image={image} />;
         })}
       </Masonry>
-      <Dialog open={dialogOpen} onClose={handleClose}>
+      <Dialog open={dialogOpen} onClose={handleClose} fullWidth maxWidth="md">
         <DialogContent />
       </Dialog>
     </>
