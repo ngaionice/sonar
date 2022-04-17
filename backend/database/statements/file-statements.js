@@ -39,7 +39,7 @@ const searchImagesStmt =
  * Params:
  * 1. image id
  */
-const getImageRolesStmt =
+const getImageReadRolesStmt =
   "select r.title from Role r where mod((select readroles from Image i where i.id = $1), r.id) = 0";
 
 /**
@@ -49,6 +49,14 @@ const getImageRolesStmt =
  * 1. image id
  */
 const getImageTagsStmt = "select tag from ImageTag where imageId = $1";
+
+/**
+ * Params:
+ * 1. image id
+ * 2. read role value
+ */
+const updateImageReadRolesStmt =
+  "update Image set readRoles = $2 where id = $1";
 
 /**
  * Params:
@@ -63,12 +71,17 @@ const selectHashesByKeyStmt =
  */
 const deleteImagesByKeyStmt = "delete from Image where id in ($1:csv)";
 
+const deleteImageTagsStmt =
+  "delete from ImageTag where (imageId, tag) in ($1:raw)";
+
 export {
-  getImageRolesStmt,
+  getImageReadRolesStmt,
   getImageTagsStmt,
   insertImageStmt,
   insertImageCacheStmt,
   searchImagesStmt,
   selectHashesByKeyStmt,
+  updateImageReadRolesStmt,
   deleteImagesByKeyStmt,
+  deleteImageTagsStmt,
 };

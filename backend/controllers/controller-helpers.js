@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getAllRoles } from "../database/user.js";
 
 const getTags = (tagsString) => {
   let tags;
@@ -7,9 +8,6 @@ const getTags = (tagsString) => {
     tags = Array.isArray(temp) ? temp : [];
   } else {
     tags = [];
-  }
-  if (tags.length < 1) {
-    tags.push("untagged");
   }
   return tags;
 };
@@ -20,6 +18,21 @@ const getRoles = (rolesString) => {
     return Array.isArray(temp) ? temp : [];
   }
   return [];
+};
+
+const getRolesValue = async (dbClient, rolesString) => {
+  const roles = getRoles(rolesString);
+  let rolesVal = 1;
+  const rolesArray = await getAllRoles(dbClient);
+  roles.forEach((role) => {
+    for (const roleObj of rolesArray) {
+      if (role === roleObj.title) {
+        rolesVal *= roleObj.id;
+        break;
+      }
+    }
+  });
+  return rolesVal;
 };
 
 const getNewFilename = (filename, extension) =>
@@ -140,4 +153,12 @@ function getNextPrime(currRolesSet) {
   throw new Error("Only 200 roles are allowed at a time.");
 }
 
-export { getDataFromUpload, getDataFromUrl, getNextPrime, isAdmin };
+export {
+  getDataFromUpload,
+  getDataFromUrl,
+  getTags,
+  getRoles,
+  getRolesValue,
+  getNextPrime,
+  isAdmin,
+};

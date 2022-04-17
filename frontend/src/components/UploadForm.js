@@ -263,7 +263,7 @@ function UploadForm() {
       }
 
       axios
-        .post(`/files/upload`, formData)
+        .post(`/files/one`, formData)
         .catch((e) => {
           alert(`Error ${e.response.status}: ${e.response.data}`);
         })

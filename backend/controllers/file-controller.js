@@ -6,6 +6,8 @@ import { getAllRoles } from "../database/user.js";
 import {
   getDataFromUpload,
   getDataFromUrl,
+  getRolesValue,
+  getTags,
   isAdmin,
 } from "./controller-helpers.js";
 
@@ -45,7 +47,9 @@ const upload = (dbClient) =>
 
     try {
       await File.insertImage(dbClient, key, awsUrl, !!isPublic, readRolesVal);
-      await File.insertImageTags(dbClient, key, tags);
+      if (tags.length > 0) {
+        await File.insertImageTags(dbClient, key, tags);
+      }
     } catch (e) {
       console.log("Tag insertion failed.");
       console.log(e);
@@ -95,9 +99,27 @@ const search = (dbClient) =>
 const get = (dbClient) =>
   asyncHandler(async (req, res) => {
     const { id } = req.query;
-    const roles = await File.getImageRoles(dbClient, id);
+    const roles = await File.getImageReadRoles(dbClient, id);
     const tags = await File.getImageTags(dbClient, id);
     res.status(200).json({ roles, tags });
+  });
+
+const update = (dbClient) =>
+  asyncHandler(async (req, res) => {
+    const { id, readRoles: readRolesString, tags: tagsString } = req.body;
+    const readRoles = await getRolesValue(readRolesString);
+    await File.updateImageReadRoles(dbClient, id, readRoles);
+
+    const existingTags = await File.getImageTags(dbClient, id);
+    const newTags = getTags(tagsString);
+
+    const toAdd = newTags.map((tag) => !existingTags.includes(tag));
+    const toDelete = existingTags.map((tag) => !newTags.includes(tag));
+
+    await File.insertImageTags(dbClient, id, toAdd);
+    await File.deleteImageTags(dbClient, id, toDelete);
+
+    res.sendStatus(200);
   });
 
 const remove = (dbClient) =>
@@ -125,4 +147,4 @@ const remove = (dbClient) =>
     res.sendStatus(200);
   });
 
-export { upload, search, remove, get };
+export { upload, search, remove, get, update };

@@ -205,7 +205,7 @@ function UserManager({ fetchOnChange, setFetchOnChange }) {
     return () => {
       mounted = false;
     };
-  }, [setUsers, fetchOnChange, axios]);
+  }, [setUsers, fetchOnChange]);
 
   if (loading) {
     return <Loader />;

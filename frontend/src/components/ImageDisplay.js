@@ -55,7 +55,7 @@ const DeleteButton = ({ imageId, index, handleClose, onDeleteCallback }) => {
 
   const handleClick = () => {
     axios
-      .delete(`/files/delete`, {
+      .delete(`/files/one`, {
         params: {
           keys: JSON.stringify([imageId]),
         },

@@ -1,14 +1,21 @@
 import {
   deleteImagesByKeyStmt,
-  getImageRolesStmt,
+  deleteImageTagsStmt,
+  getImageReadRolesStmt,
   getImageTagsStmt,
   insertImageCacheStmt,
   insertImageStmt,
   searchImagesStmt,
   selectHashesByKeyStmt,
+  updateImageReadRolesStmt,
 } from "./statements/file-statements.js";
 
 import pgpUninitialized from "pg-promise";
+
+const pgp = pgpUninitialized();
+const imageTagCols = new pgp.helpers.ColumnSet(["imageid", "tag"], {
+  table: "imagetag",
+});
 
 async function insertImage(client, key, url, isPublic, readRoles) {
   await client.none(insertImageStmt, [key, url, isPublic, readRoles]);
@@ -19,16 +26,21 @@ async function insertImageCache(client, key, url, deleteHash) {
 }
 
 async function insertImageTags(client, key, tags) {
-  const pgp = pgpUninitialized();
-  const cols = new pgp.helpers.ColumnSet(["imageid", "tag"], {
-    table: "imagetag",
-  });
   const values = tags.map((v) => ({
     imageid: key,
     tag: v,
   }));
-  const query = pgp.helpers.insert(values, cols);
+  const query = pgp.helpers.insert(values, imageTagCols);
   await client.none(query);
+}
+
+async function deleteImageTags(client, key, tags) {
+  const rawValues = tags.map((v) => ({
+    imageid: key,
+    tag: v,
+  }));
+  const values = pgp.helpers.values(rawValues, ["imageid", "tag"]);
+  await client.none(deleteImageTagsStmt, [values]);
 }
 
 /**
@@ -37,8 +49,8 @@ async function insertImageTags(client, key, tags) {
  * @param {string} imageId
  * @returns {Promise<string[]>}
  */
-async function getImageRoles(client, imageId) {
-  return await client.map(getImageRolesStmt, [imageId], (row) => row.title);
+async function getImageReadRoles(client, imageId) {
+  return await client.map(getImageReadRolesStmt, [imageId], (row) => row.title);
 }
 
 /**
@@ -49,6 +61,10 @@ async function getImageRoles(client, imageId) {
  */
 async function getImageTags(client, imageId) {
   return await client.map(getImageTagsStmt, [imageId], (row) => row.tag);
+}
+
+async function updateImageReadRoles(client, imageId, readRoleValue) {
+  await client.none(updateImageReadRolesStmt, [imageId, readRoleValue]);
 }
 
 /**
@@ -85,11 +101,13 @@ async function getHashesByKeys(client, keys) {
 
 export {
   deleteImagesByKey,
+  deleteImageTags,
   getHashesByKeys,
-  getImageRoles,
+  getImageReadRoles,
   getImageTags,
   insertImage,
   insertImageCache,
   insertImageTags,
   searchImagesByTag,
+  updateImageReadRoles,
 };
