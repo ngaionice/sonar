@@ -92,6 +92,14 @@ const search = (dbClient) =>
     res.status(200).json({ expiry, data: results });
   });
 
+const get = (dbClient) =>
+  asyncHandler(async (req, res) => {
+    const { id } = req.query;
+    const roles = await File.getImageRoles(dbClient, id);
+    const tags = await File.getImageTags(dbClient, id);
+    res.status(200).json({ roles, tags });
+  });
+
 const remove = (dbClient) =>
   asyncHandler(async (req, res) => {
     const { keys: keysString } = req.query;
@@ -117,4 +125,4 @@ const remove = (dbClient) =>
     res.sendStatus(200);
   });
 
-export { upload, search, remove };
+export { upload, search, remove, get };

@@ -34,6 +34,23 @@ const searchImagesStmt =
   "select distinct i.id, useCache, cacheUrl as url from Image i left join ImageCache ic on i.id = ic.imageId join ImageTag it on i.id = it.imageId where mod(i.readroles, $2) = 0 and it.tag ilike any (array[concat($1, '%'), concat('%_ ',$1)])";
 
 /**
+ * Returns role titles for roles that can divide the read role value of the input image id.
+ *
+ * Params:
+ * 1. image id
+ */
+const getImageRolesStmt =
+  "select r.title from Role r where mod((select readroles from Image i where i.id = $1), r.id) = 0";
+
+/**
+ * Returns image tags for the input image id.
+ *
+ * Params:
+ * 1. image id
+ */
+const getImageTagsStmt = "select tag from ImageTag where imageId = $1";
+
+/**
  * Params:
  * 1. list of image ids/keys
  */
@@ -47,6 +64,8 @@ const selectHashesByKeyStmt =
 const deleteImagesByKeyStmt = "delete from Image where id in ($1:csv)";
 
 export {
+  getImageRolesStmt,
+  getImageTagsStmt,
   insertImageStmt,
   insertImageCacheStmt,
   searchImagesStmt,

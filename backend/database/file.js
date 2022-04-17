@@ -1,5 +1,7 @@
 import {
   deleteImagesByKeyStmt,
+  getImageRolesStmt,
+  getImageTagsStmt,
   insertImageCacheStmt,
   insertImageStmt,
   searchImagesStmt,
@@ -27,6 +29,26 @@ async function insertImageTags(client, key, tags) {
   }));
   const query = pgp.helpers.insert(values, cols);
   await client.none(query);
+}
+
+/**
+ * Returns an array of role names.
+ * @param client
+ * @param {string} imageId
+ * @returns {Promise<string[]>}
+ */
+async function getImageRoles(client, imageId) {
+  return await client.map(getImageRolesStmt, [imageId], (row) => row.title);
+}
+
+/**
+ * Returns an array of image tags.
+ * @param client
+ * @param {string} imageId
+ * @returns {Promise<string[]>}
+ */
+async function getImageTags(client, imageId) {
+  return await client.map(getImageTagsStmt, [imageId], (row) => row.tag);
 }
 
 /**
@@ -64,6 +86,8 @@ async function getHashesByKeys(client, keys) {
 export {
   deleteImagesByKey,
   getHashesByKeys,
+  getImageRoles,
+  getImageTags,
   insertImage,
   insertImageCache,
   insertImageTags,
