@@ -3,13 +3,19 @@ import StyleIcon from "@mui/icons-material/Style";
 import { useLayoutEffect, useRef, useState } from "react";
 
 function TagInserter({ tags, setTags }) {
+  const [currTag, setCurrTag] = useState("");
   const handleTagInsert = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (!tags.includes(e.target.value)) {
-        setTags([...tags, e.target.value]);
+      if (!tags.includes(currTag)) {
+        setTags([...tags, currTag]);
+        setCurrTag("");
       }
     }
+  };
+
+  const handleChange = (e) => {
+    setCurrTag(e.target.value);
   };
 
   return (
@@ -24,7 +30,9 @@ function TagInserter({ tags, setTags }) {
           </InputAdornment>
         ),
       }}
+      value={currTag}
       onKeyDown={handleTagInsert}
+      onChange={handleChange}
     />
   );
 }

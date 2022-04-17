@@ -96,24 +96,24 @@ function UserCreator({ setFetchOnChange }) {
 }
 
 function UserEntry({ email, details, setFetchOnChange }) {
-  const [roles, setRoles] = useState(details.roles || []);
+  const { name: currName, roles: currRoles } = details;
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const [currRoles, setCurrRoles] = useState(roles);
-  const [currName, setCurrName] = useState(details.name);
+  const [roles, setRoles] = useState(currRoles);
+  const [name, setName] = useState(currName);
 
   const handleDialogClose = () => {
     setDialogOpen(false);
+    setRoles(details.roles);
+    setName(details.name);
   };
 
   const handleSave = () => {
-    axios
-      .put("/users/one", { email, name: currName, roles: currRoles })
-      .then(() => {
-        details.name = currName;
-        setRoles(currRoles);
-        handleDialogClose();
-      });
+    axios.put("/users/one", { email, name: name, roles: roles }).then(() => {
+      details.name = name;
+      details.roles = roles;
+      handleDialogClose();
+    });
   };
 
   const handleDelete = () => {
@@ -126,38 +126,22 @@ function UserEntry({ email, details, setFetchOnChange }) {
       });
   };
 
-  const DialogContents = () => {
-    const handleNameChange = (e) => {
-      e.preventDefault();
-      setCurrName(e.target.value);
-    };
-
-    return (
-      <Container maxWidth="md" sx={{ paddingY: 3 }}>
-        <Stack spacing={2}>
-          <TextField
-            value={currName}
-            onChange={handleNameChange}
-            label="Name"
-            autoFocus // TODO: figure out what makes it lose focus every time
-            fullWidth
-          />
-          <RoleEditor roles={currRoles} setRoles={setCurrRoles} enableAdd />
-        </Stack>
-      </Container>
-    );
+  const handleNameChange = (e) => {
+    setName(e.target.value);
   };
 
   return (
-    <ListItem>
-      <ListItemButton onClick={() => setDialogOpen(true)}>
-        <ListItemText primary={details.name} secondary={email} />
-        <Stack spacing={1} direction="row">
-          {roles.map((r) => (
-            <Chip label={r} key={r} />
-          ))}
-        </Stack>
-      </ListItemButton>
+    <>
+      <ListItem>
+        <ListItemButton onClick={() => setDialogOpen(true)}>
+          <ListItemText primary={name} secondary={email} />
+          <Stack spacing={1} direction="row">
+            {roles.map((r) => (
+              <Chip label={r} key={r} />
+            ))}
+          </Stack>
+        </ListItemButton>
+      </ListItem>
       <Dialog
         open={dialogOpen}
         onClose={handleDialogClose}
@@ -165,9 +149,21 @@ function UserEntry({ email, details, setFetchOnChange }) {
         maxWidth="md"
       >
         <DialogTitle>Edit user</DialogTitle>
+
         <DialogContent>
-          <DialogContents />
+          <Container maxWidth="md" sx={{ paddingY: 3 }}>
+            <Stack spacing={2}>
+              <TextField
+                value={name}
+                onChange={handleNameChange}
+                label="Name"
+                fullWidth
+              />
+              <RoleEditor roles={roles} setRoles={setRoles} enableAdd />
+            </Stack>
+          </Container>
         </DialogContent>
+
         <DialogActions>
           <Button color="error" onClick={handleDelete}>
             Delete
@@ -178,7 +174,7 @@ function UserEntry({ email, details, setFetchOnChange }) {
           </Button>
         </DialogActions>
       </Dialog>
-    </ListItem>
+    </>
   );
 }
 

@@ -4,6 +4,7 @@ import {
   Container,
   Dialog,
   DialogActions,
+  DialogContent,
   DialogTitle,
   FormControlLabel,
   IconButton,
@@ -287,24 +288,6 @@ function UploadForm() {
     );
   };
 
-  const DialogContents = () => {
-    return (
-      <Container maxWidth="md" sx={{ paddingY: 3 }}>
-        <Stack spacing={2}>
-          <UploadOptions />
-          <PreviewPanel selected={selected} />
-          <TagEditor tags={tags} setTags={setTags} />
-          <RoleEditor
-            roles={readRoles}
-            setRoles={setReadRoles}
-            enforcedRoles={enforcedReadRoles}
-          />
-          <ImgurCheckbox isPublic={isPublic} setIsPublic={setIsPublic} />
-        </Stack>
-      </Container>
-    );
-  };
-
   const handleDialogClose = () => {
     reset();
     setDialogOpen(false);
@@ -324,7 +307,23 @@ function UploadForm() {
         fullWidth
       >
         <DialogTitle>Upload</DialogTitle>
-        <DialogContents />
+
+        <DialogContent>
+          <Container maxWidth="md" sx={{ paddingY: 3 }}>
+            <Stack spacing={2}>
+              <UploadOptions />
+              <PreviewPanel selected={selected} />
+              <TagEditor tags={tags} setTags={setTags} />
+              <RoleEditor
+                roles={readRoles}
+                setRoles={setReadRoles}
+                enforcedRoles={enforcedReadRoles}
+              />
+              <ImgurCheckbox isPublic={isPublic} setIsPublic={setIsPublic} />
+            </Stack>
+          </Container>
+        </DialogContent>
+
         <DialogActions>
           <Button onClick={handleDialogClose}>Cancel</Button>
           <UploadButton />
