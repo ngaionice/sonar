@@ -20,9 +20,9 @@ const getRoles = (rolesString) => {
   return [];
 };
 
-const getRolesValue = async (dbClient, rolesString) => {
-  const roles = getRoles(rolesString);
+const getRolesValue = async (dbClient, roles) => {
   let rolesVal = 1;
+  // TODO: add new db function to fetch only the roles that match the array
   const rolesArray = await getAllRoles(dbClient);
   roles.forEach((role) => {
     for (const roleObj of rolesArray) {

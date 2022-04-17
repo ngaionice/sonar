@@ -7,7 +7,6 @@ import {
   getDataFromUpload,
   getDataFromUrl,
   getRolesValue,
-  getTags,
   isAdmin,
 } from "./controller-helpers.js";
 
@@ -27,7 +26,6 @@ const upload = (dbClient) =>
       return;
     }
     const { buffer, name, tags, readRoles, isPublic } = data;
-    console.log(data);
 
     const out = {};
 
@@ -106,18 +104,21 @@ const get = (dbClient) =>
 
 const update = (dbClient) =>
   asyncHandler(async (req, res) => {
-    const { id, readRoles: readRolesString, tags: tagsString } = req.body;
-    const readRoles = await getRolesValue(readRolesString);
+    const { id, readRoles: readRolesArray, tags: newTags } = req.body;
+    const readRoles = await getRolesValue(dbClient, readRolesArray);
     await File.updateImageReadRoles(dbClient, id, readRoles);
 
     const existingTags = await File.getImageTags(dbClient, id);
-    const newTags = getTags(tagsString);
 
-    const toAdd = newTags.map((tag) => !existingTags.includes(tag));
-    const toDelete = existingTags.map((tag) => !newTags.includes(tag));
+    const toAdd = newTags.filter((tag) => !existingTags.includes(tag));
+    const toDelete = existingTags.filter((tag) => !newTags.includes(tag));
 
-    await File.insertImageTags(dbClient, id, toAdd);
-    await File.deleteImageTags(dbClient, id, toDelete);
+    if (toAdd.length > 0) {
+      await File.insertImageTags(dbClient, id, toAdd);
+    }
+    if (toDelete.length > 0) {
+      await File.deleteImageTags(dbClient, id, toDelete);
+    }
 
     res.sendStatus(200);
   });

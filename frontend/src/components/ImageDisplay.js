@@ -12,7 +12,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -20,6 +20,8 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { Masonry } from "@mui/lab";
 import { axios } from "../utilities/axios";
 import ConditionalRenderer from "./ConditionalRenderer";
+import TagEditor from "./TagEditor";
+import RoleEditor from "./RoleEditor";
 
 function getUrls(baseUrl) {
   const urlModifiers = "w=248&fit=crop&auto=format";
@@ -67,13 +69,100 @@ const DeleteButton = ({ imageId, index, handleClose, onDeleteCallback }) => {
   };
 
   return (
-    <Button onClick={handleClick} color="error" variant="contained">
+    <Button onClick={handleClick} color="error" variant="outlined">
       Delete
     </Button>
   );
 };
 
-function ImageEntryDialogContent({ url, title }) {
+const SaveButton = ({ title, tags, readRoles, handleClose }) => {
+  const handleClick = () => {
+    axios
+      .put("/files/one", { id: title, tags, readRoles })
+      .then(() => {
+        handleClose();
+      })
+      .catch((e) => {
+        console.log(e);
+        alert(`Failed to update data for ${title}.`);
+      });
+  };
+
+  return (
+    <Button onClick={handleClick} variant="contained">
+      Save
+    </Button>
+  );
+};
+
+function ImageEntryDialog({
+  dialogOpen,
+  handleClose,
+  url,
+  title,
+  index,
+  onDeleteCallback,
+}) {
+  const [tags, setTags] = useState([]);
+  const [readRoles, setReadRoles] = useState([]);
+
+  return (
+    <Dialog open={dialogOpen} onClose={handleClose} fullWidth maxWidth="md">
+      <DialogTitle>{title}</DialogTitle>
+
+      <DialogContent>
+        <ImageEntryDialogContent
+          url={url}
+          title={title}
+          tags={tags}
+          setTags={setTags}
+          roles={readRoles}
+          setRoles={setReadRoles}
+        />
+      </DialogContent>
+
+      <DialogActions>
+        <ConditionalRenderer condition="loggedInAdmin">
+          <DeleteButton
+            handleClose={handleClose}
+            imageId={title}
+            index={index}
+            onDeleteCallback={onDeleteCallback}
+          />
+          <SaveButton
+            handleClose={handleClose}
+            title={title}
+            tags={tags}
+            readRoles={readRoles}
+          />
+        </ConditionalRenderer>
+        <Button onClick={handleClose}>Close</Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+function ImageEntryDialogContent({
+  url,
+  title,
+  tags,
+  setTags,
+  roles,
+  setRoles,
+}) {
+  useEffect(() => {
+    const fetchThenSet = async () => {
+      const { data } = await axios.get("/files/one", { params: { id: title } });
+      const { roles: r, tags: t } = data;
+      setTags(t);
+      setRoles(r);
+    };
+    fetchThenSet().catch((e) => {
+      console.log(e);
+      alert(`Failed to fetch data for ${title}.`);
+    });
+  }, [setTags, setRoles, title]);
+
   return (
     <Container maxWidth="md" sx={{ paddingTop: 3 }}>
       <Stack spacing={2}>
@@ -87,6 +176,14 @@ function ImageEntryDialogContent({ url, title }) {
           </Box>
         </Box>
         <UrlDisplay url={url} />
+        <ConditionalRenderer condition="loggedInAdmin">
+          <TagEditor tags={tags} setTags={setTags} />
+          <RoleEditor
+            roles={roles}
+            setRoles={setRoles}
+            enforcedRoles={["Admin"]}
+          />
+        </ConditionalRenderer>
       </Stack>
     </Container>
   );
@@ -128,24 +225,14 @@ function ImageEntry({ image, onDeleteCallback, index }) {
         />
       </ButtonBase>
 
-      <Dialog open={dialogOpen} onClose={handleClose} fullWidth maxWidth="md">
-        <DialogTitle>{title}</DialogTitle>
-
-        <DialogContent>
-          <ImageEntryDialogContent url={img} title={title} />
-        </DialogContent>
-
-        <ConditionalRenderer condition="loggedInAdmin">
-          <DialogActions>
-            <DeleteButton
-              handleClose={handleClose}
-              imageId={title}
-              index={index}
-              onDeleteCallback={onDeleteCallback}
-            />
-          </DialogActions>
-        </ConditionalRenderer>
-      </Dialog>
+      <ImageEntryDialog
+        title={title}
+        url={img}
+        index={index}
+        onDeleteCallback={onDeleteCallback}
+        handleClose={handleClose}
+        dialogOpen={dialogOpen}
+      />
     </>
   );
 }
