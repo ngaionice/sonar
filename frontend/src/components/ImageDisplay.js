@@ -252,7 +252,6 @@ function ImageDisplay({ images }) {
   useEffect(() => {
     let mounted = true;
 
-    setLoading(true);
     setTimeout(() => {
       if (mounted) {
         setLoading(false);
@@ -266,10 +265,11 @@ function ImageDisplay({ images }) {
 
   const DummyImage = () => {
     if (images?.data.length > 0 && images?.data.length < 4) {
-      return Array.from(Array(4 - images.data.length)).map(() => (
+      return Array.from(Array(4 - images.data.length)).map((_, i) => (
         <img
           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Xw8AAoMBgDTD2qgAAAAASUVORK5CYII="
           alt=""
+          key={i}
         />
       ));
     }
@@ -282,45 +282,71 @@ function ImageDisplay({ images }) {
       <img
         src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Xw8AAoMBgDTD2qgAAAAASUVORK5CYII="
         alt=""
+        style={{ height: "1px" }}
       />
     );
   };
 
-  if (!images?.data) {
-    return (
-      <Stack alignItems="center">
-        <Typography variant="body1">Start typing to search.</Typography>
-      </Stack>
-    );
-  }
+  const Placeholder = () => {
+    if (!images?.data) {
+      return (
+        <Stack alignItems="center">
+          <Typography variant="body1">Start typing to search.</Typography>
+        </Stack>
+      );
+    }
 
-  if (images?.data && images.data.length < 1) {
-    const text = images?.data ? "No results found." : "Start typing to search.";
+    if (images?.data && images.data.length < 1) {
+      const text = "No results found.";
+      return (
+        <Stack alignItems="center">
+          <Typography variant="body1">{text}</Typography>
+        </Stack>
+      );
+    }
+
+    return null;
+  };
+
+  const Content = () => {
+    if (!images?.data || (images?.data && images.data.length < 1)) {
+      return (
+        <img
+          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Xw8AAoMBgDTD2qgAAAAASUVORK5CYII="
+          alt=""
+          style={{ height: "1px" }}
+        />
+      );
+    }
+
     return (
-      <Stack alignItems="center">
-        <Typography variant="body1">{text}</Typography>
-      </Stack>
+      <>
+        {images.data.map((image, index) => {
+          image.index = index;
+          const onDeleteCallback = () => {
+            images.data.splice(index, 1);
+          };
+          return (
+            <ImageEntry
+              key={image.id}
+              image={image}
+              index={index}
+              onDeleteCallback={onDeleteCallback}
+            />
+          );
+        })}
+        <DummyImage />
+      </>
     );
-  }
+  };
 
   return (
-    <Masonry columns={4} spacing={2}>
-      {images.data.map((image, index) => {
-        image.index = index;
-        const onDeleteCallback = () => {
-          images.data.splice(index, 1);
-        };
-        return (
-          <ImageEntry
-            key={image.id}
-            image={image}
-            index={index}
-            onDeleteCallback={onDeleteCallback}
-          />
-        );
-      })}
-      <DummyImage />
-    </Masonry>
+    <>
+      <Placeholder />
+      <Masonry columns={4} spacing={2}>
+        <Content />
+      </Masonry>
+    </>
   );
 }
 
