@@ -166,13 +166,23 @@ function ImageEntryDialogContent({
   return (
     <Container maxWidth="md" sx={{ paddingTop: 3 }}>
       <Stack spacing={2}>
-        <Box display="flex" justifyContent="center" flexGrow={1}>
+        <Box
+          display="flex"
+          justifyContent="center"
+          flexGrow={1}
+          alignItems="center"
+        >
           <Box
-            sx={{ width: "50%", maxHeight: "50%" }}
             display="flex"
             justifyContent="center"
+            alignItems="center"
+            sx={{ maxWidth: "50%", maxHeight: "50%" }}
           >
-            <img src={url ?? ""} alt={title ?? ""} />
+            <img
+              src={url ?? ""}
+              alt={title ?? ""}
+              style={{ objectFit: "scale-down" }}
+            />
           </Box>
         </Box>
         <UrlDisplay url={url} />
@@ -238,6 +248,44 @@ function ImageEntry({ image, onDeleteCallback, index }) {
 }
 
 function ImageDisplay({ images }) {
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let mounted = true;
+
+    setLoading(true);
+    setTimeout(() => {
+      if (mounted) {
+        setLoading(false);
+      }
+    }, 1);
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const DummyImage = () => {
+    if (images?.data.length > 0 && images?.data.length < 4) {
+      return Array.from(Array(4 - images.data.length)).map(() => (
+        <img
+          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Xw8AAoMBgDTD2qgAAAAASUVORK5CYII="
+          alt=""
+        />
+      ));
+    }
+
+    if (loading) {
+      return null;
+    }
+
+    return (
+      <img
+        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Xw8AAoMBgDTD2qgAAAAASUVORK5CYII="
+        alt=""
+      />
+    );
+  };
+
   if (!images?.data) {
     return (
       <Stack alignItems="center">
@@ -256,24 +304,23 @@ function ImageDisplay({ images }) {
   }
 
   return (
-    <>
-      <Masonry columns={4} spacing={2}>
-        {images.data.map((image, index) => {
-          image.index = index;
-          const onDeleteCallback = () => {
-            images.data.splice(index, 1);
-          };
-          return (
-            <ImageEntry
-              key={image.id}
-              image={image}
-              index={index}
-              onDeleteCallback={onDeleteCallback}
-            />
-          );
-        })}
-      </Masonry>
-    </>
+    <Masonry columns={4} spacing={2}>
+      {images.data.map((image, index) => {
+        image.index = index;
+        const onDeleteCallback = () => {
+          images.data.splice(index, 1);
+        };
+        return (
+          <ImageEntry
+            key={image.id}
+            image={image}
+            index={index}
+            onDeleteCallback={onDeleteCallback}
+          />
+        );
+      })}
+      <DummyImage />
+    </Masonry>
   );
 }
 
