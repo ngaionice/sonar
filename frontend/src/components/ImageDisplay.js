@@ -22,6 +22,7 @@ import { axios } from "../utilities/axios";
 import ConditionalRenderer from "./ConditionalRenderer";
 import TagEditor from "./TagEditor";
 import RoleEditor from "./RoleEditor";
+import ConfirmationDialog from "./ConfirmationDialog";
 
 function getUrls(baseUrl) {
   const urlModifiers = "w=248&fit=crop&auto=format";
@@ -52,10 +53,16 @@ const UrlDisplay = ({ url }) => {
   );
 };
 
-const DeleteButton = ({ imageId, index, handleClose, onDeleteCallback }) => {
+const DeleteButton = ({ imageId, index, setDialogOpen, onDeleteCallback }) => {
+  const [confirmOpen, setConfirmOpen] = useState(false);
   if (!imageId || isNaN(index)) return null;
 
   const handleClick = () => {
+    setConfirmOpen(true);
+  };
+
+  const handleDelete = () => {
+    setConfirmOpen(false);
     axios
       .delete(`/files/one`, {
         params: {
@@ -64,14 +71,27 @@ const DeleteButton = ({ imageId, index, handleClose, onDeleteCallback }) => {
       })
       .then(() => {
         onDeleteCallback();
-        handleClose();
+        setDialogOpen(false);
       });
   };
 
+  const handleCancel = () => {
+    setConfirmOpen(false);
+  };
+
   return (
-    <Button onClick={handleClick} color="error" variant="outlined">
-      Delete
-    </Button>
+    <>
+      <Button onClick={handleClick} color="error" variant="outlined">
+        Delete
+      </Button>
+      <ConfirmationDialog
+        title="Confirm deletion"
+        description={`Are you sure you want to delete ${imageId}? This action is irreversible.`}
+        confirmCallback={handleDelete}
+        cancelCallback={handleCancel}
+        open={confirmOpen}
+      />
+    </>
   );
 };
 
@@ -97,7 +117,7 @@ const SaveButton = ({ title, tags, readRoles, handleClose }) => {
 
 function ImageEntryDialog({
   dialogOpen,
-  handleClose,
+  setDialogOpen,
   url,
   title,
   index,
@@ -105,6 +125,10 @@ function ImageEntryDialog({
 }) {
   const [tags, setTags] = useState([]);
   const [readRoles, setReadRoles] = useState([]);
+
+  const handleClose = () => {
+    setDialogOpen(false);
+  };
 
   return (
     <Dialog open={dialogOpen} onClose={handleClose} fullWidth maxWidth="md">
@@ -122,9 +146,10 @@ function ImageEntryDialog({
       </DialogContent>
 
       <DialogActions>
+        <Button onClick={handleClose}>Close</Button>
         <ConditionalRenderer condition="loggedInAdmin">
           <DeleteButton
-            handleClose={handleClose}
+            setDialogOpen={setDialogOpen}
             imageId={title}
             index={index}
             onDeleteCallback={onDeleteCallback}
@@ -136,7 +161,6 @@ function ImageEntryDialog({
             readRoles={readRoles}
           />
         </ConditionalRenderer>
-        <Button onClick={handleClose}>Close</Button>
       </DialogActions>
     </Dialog>
   );
@@ -214,10 +238,6 @@ function ImageEntry({ image, onDeleteCallback, index }) {
     setDialogOpen(true);
   };
 
-  const handleClose = () => {
-    setDialogOpen(false);
-  };
-
   return (
     <>
       <ButtonBase onClick={handleClick}>
@@ -240,7 +260,7 @@ function ImageEntry({ image, onDeleteCallback, index }) {
         url={img}
         index={index}
         onDeleteCallback={onDeleteCallback}
-        handleClose={handleClose}
+        setDialogOpen={setDialogOpen}
         dialogOpen={dialogOpen}
       />
     </>
@@ -267,7 +287,7 @@ function ImageDisplay({ images }) {
     if (images?.data.length > 0 && images?.data.length < 4) {
       return Array.from(Array(4 - images.data.length)).map((_, i) => (
         <img
-          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Xw8AAoMBgDTD2qgAAAAASUVORK5CYII="
+          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
           alt=""
           key={i}
         />
@@ -280,7 +300,7 @@ function ImageDisplay({ images }) {
 
     return (
       <img
-        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Xw8AAoMBgDTD2qgAAAAASUVORK5CYII="
+        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
         alt=""
         style={{ height: "1px" }}
       />
@@ -312,7 +332,7 @@ function ImageDisplay({ images }) {
     if (!images?.data || (images?.data && images.data.length < 1)) {
       return (
         <img
-          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Xw8AAoMBgDTD2qgAAAAASUVORK5CYII="
+          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
           alt=""
           style={{ height: "1px" }}
         />

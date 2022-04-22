@@ -194,7 +194,7 @@ function UploadForm() {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const uploadHotkeyListener = (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.code === "KeyA") {
+    if (e.altKey && e.code === "KeyA") {
       setDialogOpen(true);
     }
   };
