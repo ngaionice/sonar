@@ -1,10 +1,24 @@
 import { InputAdornment, TextField } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { axios } from "../utilities/axios";
 import SearchIcon from "@mui/icons-material/Search";
 
 function ImageSearch({ setResults }) {
   const [searchTerm, setSearchTerm] = useState("");
+  const searchBarRef = useRef(null);
+
+  useEffect(() => {
+    const listener = (e) => {
+      if (e.altKey && e.code === "KeyS") {
+        searchBarRef.current.focus();
+      }
+    };
+
+    document.addEventListener("keydown", listener);
+    return () => {
+      document.removeEventListener("keydown", listener);
+    };
+  }, []);
 
   useEffect(() => {
     let changed = false;
@@ -53,6 +67,7 @@ function ImageSearch({ setResults }) {
             </InputAdornment>
           ),
         }}
+        inputRef={searchBarRef}
       />
     );
   };
