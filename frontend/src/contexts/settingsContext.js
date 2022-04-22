@@ -5,7 +5,13 @@ const SettingsContext = createContext();
 const storageVariables = {
   darkMode: "dark-mode",
   serverUrl: "server-url",
+  imageDisplayMode: "image-display-mode",
 };
+
+const imageDisplayModes = [
+  { label: "Compact", columns: 12, spacing: 1 },
+  { label: "Cozy", columns: 4, spacing: 2 },
+];
 
 function useSettings() {
   const context = useContext(SettingsContext);
@@ -35,6 +41,20 @@ function reducer(state, action) {
         ...state,
         serverUrl: action.payload,
       };
+    case "setImageDisplayMode":
+      if (typeof action.payload !== "object") {
+        throw new Error(
+          "Invalid image display mode type. Expected type Object."
+        );
+      }
+      localStorage.setItem(
+        storageVariables.imageDisplayMode,
+        JSON.stringify(action.payload)
+      );
+      return {
+        ...state,
+        imageDisplayMode: action.payload,
+      };
     default:
       throw new Error("Illegal action.type for settings reducer.");
   }
@@ -44,6 +64,9 @@ function initializer() {
   return {
     serverUrl: localStorage.getItem(storageVariables.serverUrl) ?? "",
     darkMode: localStorage.getItem(storageVariables.darkMode) === "dark",
+    imageDisplayMode:
+      JSON.parse(localStorage.getItem(storageVariables.imageDisplayMode)) ??
+      imageDisplayModes[1],
   };
 }
 
@@ -53,4 +76,4 @@ function SettingsProvider(props) {
   return <SettingsContext.Provider value={value} {...props} />;
 }
 
-export { useSettings, SettingsProvider };
+export { useSettings, SettingsProvider, imageDisplayModes };

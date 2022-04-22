@@ -23,6 +23,7 @@ import ConditionalRenderer from "./ConditionalRenderer";
 import TagEditor from "./TagEditor";
 import RoleEditor from "./RoleEditor";
 import ConfirmationDialog from "./ConfirmationDialog";
+import { useSettings } from "../contexts/settingsContext";
 
 function getUrls(baseUrl) {
   const urlModifiers = "w=248&fit=crop&auto=format";
@@ -267,8 +268,9 @@ function ImageEntry({ image, onDeleteCallback, index }) {
   );
 }
 
-function ImageDisplay({ images, columns, columnSpacing }) {
+function ImageDisplay({ images }) {
   const [loading, setLoading] = useState(true);
+  const [settings] = useSettings();
   useEffect(() => {
     let mounted = true;
 
@@ -363,7 +365,10 @@ function ImageDisplay({ images, columns, columnSpacing }) {
   return (
     <>
       <Placeholder />
-      <Masonry columns={columns} spacing={columnSpacing}>
+      <Masonry
+        columns={settings.imageDisplayMode?.columns ?? 4}
+        spacing={settings.imageDisplayMode?.spacing ?? 2}
+      >
         <Content />
       </Masonry>
     </>

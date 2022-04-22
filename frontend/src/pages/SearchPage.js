@@ -1,22 +1,28 @@
 import ImageSearch from "../components/ImageSearch";
 import ImageDisplay from "../components/ImageDisplay";
 import BasePage from "./BasePage";
-import { useState } from "react";
 import { Button, ButtonGroup, Stack } from "@mui/material";
+import { imageDisplayModes, useSettings } from "../contexts/settingsContext";
 
-const displayModes = [
-  { label: "Compact", columns: 12, spacing: 1 },
-  { label: "Cozy", columns: 4, spacing: 2 },
-];
+function DisplayConfig() {
+  const [settings, dispatchSettings] = useSettings();
 
-function DisplayConfig({ displayMode, setDisplayMode }) {
+  const changeMode = (payload) => {
+    dispatchSettings({ type: "setImageDisplayMode", payload });
+  };
+
   return (
     <ButtonGroup>
-      {displayModes.map((mode) => (
+      {imageDisplayModes.map((mode) => (
         <Button
-          onClick={() => setDisplayMode(mode)}
-          variant={displayMode.label === mode.label ? "contained" : "outlined"}
+          onClick={() => changeMode(mode)}
+          variant={
+            settings.imageDisplayMode.label === mode.label
+              ? "contained"
+              : "outlined"
+          }
           disableElevation
+          key={mode.label}
         >
           {mode.label}
         </Button>
@@ -26,22 +32,13 @@ function DisplayConfig({ displayMode, setDisplayMode }) {
 }
 
 function SearchPage({ data, setData }) {
-  const [displayMode, setDisplayMode] = useState(displayModes[1]);
-
   return (
     <BasePage title="Search">
       <Stack direction="row" spacing={2}>
         <ImageSearch setResults={setData} />
-        <DisplayConfig
-          setDisplayMode={setDisplayMode}
-          displayMode={displayMode}
-        />
+        <DisplayConfig />
       </Stack>
-      <ImageDisplay
-        images={data}
-        columns={displayMode.columns}
-        columnSpacing={displayMode.spacing}
-      />
+      <ImageDisplay images={data} />
     </BasePage>
   );
 }
