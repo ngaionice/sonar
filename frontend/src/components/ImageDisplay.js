@@ -267,7 +267,7 @@ function ImageEntry({ image, onDeleteCallback, index }) {
   );
 }
 
-function ImageDisplay({ images }) {
+function ImageDisplay({ images, columns, columnSpacing }) {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     let mounted = true;
@@ -363,7 +363,7 @@ function ImageDisplay({ images }) {
   return (
     <>
       <Placeholder />
-      <Masonry columns={4} spacing={2}>
+      <Masonry columns={columns} spacing={columnSpacing}>
         <Content />
       </Masonry>
     </>
