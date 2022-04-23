@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { axios } from "../utilities/axios";
 import SearchIcon from "@mui/icons-material/Search";
 
-function ImageSearch({ setResults }) {
+function ImageSearch({ setResults, setIsFocused }) {
   const [searchTerm, setSearchTerm] = useState("");
   const searchBarRef = useRef(null);
 
@@ -52,27 +52,34 @@ function ImageSearch({ setResults }) {
     setSearchTerm(e.target.value);
   };
 
-  const SearchField = () => {
-    return (
-      <TextField
-        autoFocus
-        size="small"
-        onChange={handleTermChange}
-        value={searchTerm}
-        fullWidth
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon />
-            </InputAdornment>
-          ),
-        }}
-        inputRef={searchBarRef}
-      />
-    );
+  const handleFocus = () => {
+    console.log("focused");
+    setIsFocused(true);
   };
 
-  return <SearchField />;
+  const handleBlur = () => {
+    console.log("blurred");
+    setIsFocused(false);
+  };
+
+  return (
+    <TextField
+      size="small"
+      onChange={handleTermChange}
+      value={searchTerm}
+      fullWidth
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <SearchIcon />
+          </InputAdornment>
+        ),
+      }}
+      inputRef={searchBarRef}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+    />
+  );
 }
 
 export default ImageSearch;

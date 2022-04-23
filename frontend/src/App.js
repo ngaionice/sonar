@@ -57,6 +57,7 @@ function App() {
   }
 
   const [data, setData] = useState([]);
+  const [disableGlobalPaste, setDisableGlobalPaste] = useState(false);
 
   return (
     <UserProvider>
@@ -65,7 +66,7 @@ function App() {
           <CssBaseline />
           <AppBar>
             <Box sx={{ flexGrow: 1 }} />
-            <ToolbarMenu />
+            <ToolbarMenu disableGlobalPaste={disableGlobalPaste} />
           </AppBar>
           <Routes>
             <Route path="/" element={<LoginPage />} />
@@ -73,7 +74,11 @@ function App() {
               path="/search"
               element={
                 <SecurityFilter>
-                  <SearchPage data={data} setData={setData} />
+                  <SearchPage
+                    data={data}
+                    setData={setData}
+                    setDisableGlobalPaste={setDisableGlobalPaste}
+                  />
                 </SecurityFilter>
               }
             />

@@ -18,7 +18,7 @@ function LinkIconButton({ title, to, children }) {
   );
 }
 
-function ToolbarMenu() {
+function ToolbarMenu({ disableGlobalPaste }) {
   return (
     <Stack spacing={1} direction="row">
       <ConditionalRenderer>
@@ -28,7 +28,7 @@ function ToolbarMenu() {
       </ConditionalRenderer>
 
       <ConditionalRenderer condition="loggedInAdmin">
-        <UploadForm />
+        <UploadForm allowGlobalPaste={!disableGlobalPaste} />
         <LinkIconButton title="Manage users" to="/users">
           <ManageAccountsIcon />
         </LinkIconButton>

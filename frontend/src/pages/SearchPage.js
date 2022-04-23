@@ -31,11 +31,14 @@ function DisplayConfig() {
   );
 }
 
-function SearchPage({ data, setData }) {
+function SearchPage({ data, setData, setDisableGlobalPaste }) {
   return (
     <BasePage title="Search">
       <Stack direction="row" spacing={2}>
-        <ImageSearch setResults={setData} />
+        <ImageSearch
+          setResults={setData}
+          setIsFocused={setDisableGlobalPaste}
+        />
         <DisplayConfig />
       </Stack>
       <ImageDisplay images={data} />

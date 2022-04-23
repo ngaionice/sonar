@@ -183,7 +183,30 @@ const ImgurCheckbox = ({ isPublic, setIsPublic }) => {
 
 const enforcedReadRoles = ["Admin"];
 
-function UploadForm() {
+function testImage(url, timeoutT) {
+  return new Promise(function (resolve, reject) {
+    const timeout = timeoutT || 5000;
+    let timer;
+    let img = new Image();
+    img.onerror = img.onabort = function () {
+      clearTimeout(timer);
+      reject("error");
+    };
+    img.onload = function () {
+      clearTimeout(timer);
+      resolve("success");
+    };
+    timer = setTimeout(function () {
+      // reset .src to invalid URL so it stops previous
+      // loading, but doesn't trigger new load
+      img.src = "//!!!!/test.jpg";
+      reject("timeout");
+    }, timeout);
+    img.src = url;
+  });
+}
+
+function UploadForm({ allowGlobalPaste }) {
   const [user] = useUser();
   const [selected, setSelected] = useState({});
   const [isPublic, setIsPublic] = useState(false);
@@ -193,18 +216,55 @@ function UploadForm() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const uploadHotkeyListener = (e) => {
-    if (e.altKey && e.code === "KeyA") {
-      setDialogOpen(true);
-    }
-  };
-
   useEffect(() => {
+    const uploadHotkeyListener = (e) => {
+      if (e.altKey && e.code === "KeyA") {
+        setDialogOpen(true);
+      }
+    };
+
     document.addEventListener("keydown", uploadHotkeyListener);
     return () => {
       document.removeEventListener("keydown", uploadHotkeyListener);
     };
   }, []);
+
+  useEffect(() => {
+    const pasteListener = async (e) => {
+      const clipboardItems = e.clipboardData.items;
+      const items = [...clipboardItems].filter(
+        (item) =>
+          item.type.indexOf("image") !== -1 || item.type.indexOf("text") !== -1
+      );
+
+      if (items.length === 0 || !allowGlobalPaste) {
+        return;
+      }
+
+      try {
+        if (items[0].type.indexOf("image") !== -1) {
+          const blob = items[0].getAsFile();
+          setSelected({ type: "file", data: blob });
+          setDialogOpen(true);
+        } else {
+          items[0].getAsString(async (s) => {
+            try {
+              await testImage(s, 3000);
+              setSelected({ type: "url", data: s });
+              setDialogOpen(true);
+            } catch (e) {
+              console.log(e);
+            }
+          });
+        }
+      } catch (e) {} // do nothing, invalid paste
+    };
+
+    document.addEventListener("paste", pasteListener);
+    return () => {
+      document.removeEventListener("paste", pasteListener);
+    };
+  });
 
   if (!user.isSignedIn) return null;
 
