@@ -246,15 +246,17 @@ function UploadForm({ allowGlobalPaste }) {
           const blob = items[0].getAsFile();
           setSelected({ type: "file", data: blob });
           setDialogOpen(true);
+          setUploadMode(0);
         } else {
           items[0].getAsString(async (s) => {
+            const parsed = s.match(/src="(.+)"/);
+            const extracted = parsed.length === 2 ? parsed[1] : s;
             try {
-              await testImage(s, 3000);
-              setSelected({ type: "url", data: s });
+              await testImage(extracted, 3000);
+              setSelected({ type: "url", data: extracted });
               setDialogOpen(true);
-            } catch (e) {
-              console.log(e);
-            }
+              setUploadMode(1);
+            } catch (e) {}
           });
         }
       } catch (e) {} // do nothing, invalid paste
