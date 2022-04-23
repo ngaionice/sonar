@@ -1,4 +1,5 @@
 import pgpUninitialized from "pg-promise";
+import path from "path";
 
 /**
  * Returns a promise that, if resolved, contains a database client that has established a connection with the database.
@@ -13,10 +14,12 @@ async function getDatabaseClient(config = { log: false }) {
 
     const pgp = pgpUninitialized(options);
     pgp.pg.types.setTypeParser(20, parseInt);
+    const __dirname = path.resolve();
+    console.log(path.resolve(__dirname, "backend", "certs"));
     const client = await pgp({
       connectionString: process.env.DB_URI.replace(
-        "$env:appdata",
-        process.env.APPDATA
+        "$env:appdata\\.postgresql",
+        path.resolve(__dirname, "backend", "certs")
       ),
     });
 
