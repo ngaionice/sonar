@@ -93,6 +93,7 @@ const login = (dbClient) =>
         isAdmin: isAdmin(roles),
       });
     } catch (e) {
+      if (process.env.LOGGING === "1") console.log(e);
       res.status(401).send("Invalid token");
     }
   });
@@ -130,6 +131,7 @@ const refresh = (dbClient) =>
         tokens,
       });
     } catch (e) {
+      if (process.env.LOGGING === "1") console.log(e);
       res.status(401).send("Invalid token, re-login2");
     }
   });
