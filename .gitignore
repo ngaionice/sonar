@@ -2,6 +2,10 @@
 /frontend/node_modules
 /.idea
 
-/frontend/.env*
-.env*
+# production build
+/frontend/build
+
+# env
+/frontend/.env
+.env
 cli

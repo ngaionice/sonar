@@ -8,10 +8,11 @@
     "dev": "concurrently \"pnpm run server\" \"pnpm run client\"",
     "server": "nodemon backend/server",
     "client": "pnpm start --prefix frontend",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false pnpm install --dir frontend && pnpm run build --dir frontend"
   },
   "keywords": [],
-  "author": "",
+  "author": "ngaionice",
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.1077.0",
