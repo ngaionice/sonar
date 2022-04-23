@@ -103,8 +103,7 @@ const SaveButton = ({ title, tags, readRoles, handleClose }) => {
       .then(() => {
         handleClose();
       })
-      .catch((e) => {
-        console.log(e);
+      .catch((_) => {
         alert(`Failed to update data for ${title}.`);
       });
   };
@@ -182,8 +181,7 @@ function ImageEntryDialogContent({
       setTags(t);
       setRoles(r);
     };
-    fetchThenSet().catch((e) => {
-      console.log(e);
+    fetchThenSet().catch((_) => {
       alert(`Failed to fetch data for ${title}.`);
     });
   }, [setTags, setRoles, title]);

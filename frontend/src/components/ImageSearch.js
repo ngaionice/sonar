@@ -53,12 +53,10 @@ function ImageSearch({ setResults, setIsFocused }) {
   };
 
   const handleFocus = () => {
-    console.log("focused");
     setIsFocused(true);
   };
 
   const handleBlur = () => {
-    console.log("blurred");
     setIsFocused(false);
   };
 
