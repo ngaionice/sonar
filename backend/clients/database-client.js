@@ -18,8 +18,8 @@ async function getDatabaseClient(config = { log: false }) {
     console.log(path.resolve(__dirname, "backend", "certs"));
     const client = await pgp({
       connectionString: process.env.DB_URI.replace(
-        "$env:appdata\\.postgresql",
-        path.resolve(__dirname, "backend", "certs")
+        "$env:appdata\\.postgresql\\root.crt",
+        path.resolve(__dirname, "backend", "certs", "root.crt")
       ),
     });
 
